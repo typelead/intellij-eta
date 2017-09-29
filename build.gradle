@@ -1,0 +1,47 @@
+// Depend on local gradle-eta plugin.
+buildscript {
+    repositories {
+        mavenLocal()
+
+        dependencies {
+            classpath 'com.typelead:gradle-eta:0.0.1-SNAPSHOT'
+        }
+    }
+}
+
+plugins {
+    id "org.jetbrains.intellij" version "0.2.16"
+}
+
+group 'com.typelead'
+
+apply plugin: 'java'
+apply plugin: 'eta'
+apply plugin: 'org.jetbrains.intellij'
+
+ext {
+    javaVersion = '1.8'
+}
+
+intellij {
+    version = '2017.2'
+    pluginName = 'IntelliJ-Eta'
+    // Makes it easy to support multiple intellij versions.
+    // If we want to set this to true, we should find a way to cross build
+    // against multiple intellij versions.
+    updateSinceUntilBuild = false
+}
+
+eta {
+    etlasVersion = '1.0.2.0'
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}

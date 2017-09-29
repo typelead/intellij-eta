@@ -1,0 +1,5 @@
+.cabal-sandbox/
+.gradle/
+.idea/
+build/
+cabal.sandbox.config

@@ -1,0 +1,22 @@
+name:                intellij-eta
+version:             0.0.1-SNAPSHOT
+license:             MIT
+build-type:          Simple
+cabal-version:       >=1.10
+
+library
+  build-depends:       base >=4.8 && <4.9
+  hs-source-dirs:      src/main/eta
+  default-language:    Haskell2010
+  exposed-modules:
+    IntelliJ.Plugin.Eta.Lang.Parser.EtaParserDefinition
+    IntelliJ.Plugin.Eta.Lang.Parser.EtaParser
+    IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
+  default-extensions:
+    DataKinds
+    FlexibleContexts
+    MagicHash
+    NoImplicitPrelude
+    MultiParamTypeClasses
+    TypeFamilies
+    TypeOperators
