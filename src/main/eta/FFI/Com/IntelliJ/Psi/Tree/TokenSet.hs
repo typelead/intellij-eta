@@ -17,4 +17,4 @@ foreign import java unsafe "@static com.intellij.psi.tree.TokenSet.create"
   createFromArray :: IElementTypeArray -> TokenSet
 
 create :: [IElementType] -> TokenSet
-create types = createFromArray $ pureJava $ arrayFromList $ types
+create types = createFromArray $ unsafePerformJava $ arrayFromList $ types

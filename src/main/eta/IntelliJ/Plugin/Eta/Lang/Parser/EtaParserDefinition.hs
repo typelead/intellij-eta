@@ -17,53 +17,46 @@ data {-# CLASS "com.typelead.intellij.plugin.eta.lang.parser.EtaParserDefinition
   EtaParserDefinition = EtaParserDefinition (Object# EtaParserDefinition)
   deriving Class
 
-createLexer :: Java EtaParserDefinition EtaLexer
+foreign export java "createLexer" createLexer
+  :: Java EtaParserDefinition EtaLexer
 createLexer = newEtaLexer
 
-foreign export java "createLexer" createLexer :: Java EtaParserDefinition EtaLexer
-
-createParser :: Project -> Java EtaParserDefinition EtaParser
+foreign export java "createParser" createParser
+  :: Project -> Java EtaParserDefinition EtaParser
 createParser project = newEtaParser
-
-foreign export java "createParser" createParser :: Project -> Java EtaParserDefinition EtaParser
 
 {-# NOINLINE fileNodeType #-}
 fileNodeType :: IFileElementType
-fileNodeType = pureJava $ newIFileElementType etaLanguage
+fileNodeType = unsafePerformJava $ newIFileElementType etaLanguage
 
-getFileNodeType :: Java EtaParserDefinition IFileElementType
+foreign export java "getFileNodeType" getFileNodeType
+  :: Java EtaParserDefinition IFileElementType
 getFileNodeType = return fileNodeType
 
 {-# NOINLINE whiteSpaces #-}
 whiteSpaces :: TokenSet
 whiteSpaces = TokenSet.create [TokenType.whiteSpace]
 
-getWhitespaceTokens :: Java EtaParserDefinition TokenSet
+foreign export java "getWhitespaceTokens" getWhitespaceTokens
+  :: Java EtaParserDefinition TokenSet
 getWhitespaceTokens = return whiteSpaces
 
-foreign export java "getWhitespaceTokens" getWhitespaceTokens :: Java EtaParserDefinition TokenSet
-
-getCommentTokens :: Java EtaParserDefinition TokenSet
+foreign export java "getCommentTokens" getCommentTokens
+  :: Java EtaParserDefinition TokenSet
 getCommentTokens = return TokenSet.empty
 
-foreign export java "getCommentTokens" getCommentTokens :: Java EtaParserDefinition TokenSet
-
-getStringLiteralElements :: Java EtaParserDefinition TokenSet
+foreign export java "getStringLiteralElements" getStringLiteralElements
+  :: Java EtaParserDefinition TokenSet
 getStringLiteralElements = return TokenSet.empty
-
-foreign export java "getStringLiteralElements" getStringLiteralElements :: Java EtaParserDefinition TokenSet
-
-createElement :: ASTNode -> Java EtaParserDefinition PsiElement
-createElement = undefined
 
 foreign export java "createElement" createElement
   :: ASTNode -> Java EtaParserDefinition PsiElement
-
-createFile :: FileViewProvider -> Java EtaParserDefinition PsiFile
-createFile fileViewProvider = undefined
+createElement = undefined
 
 foreign export java "createFile" createFile
   :: FileViewProvider -> Java EtaParserDefinition PsiFile
+createFile fileViewProvider = undefined
 
-spaceExistanceTypeBetweenTokens :: ASTNode -> ASTNode -> Java EtaParserDefinition SpaceRequirements
+foreign export java "spaceExistanceTypeBetweenTokens" spaceExistanceTypeBetweenTokens
+  :: ASTNode -> ASTNode -> Java EtaParserDefinition SpaceRequirements
 spaceExistanceTypeBetweenTokens left right = return SpaceRequirements.may

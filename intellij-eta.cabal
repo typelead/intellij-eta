@@ -16,7 +16,8 @@ library
     DataKinds
     FlexibleContexts
     MagicHash
-    NoImplicitPrelude
     MultiParamTypeClasses
+    NoImplicitPrelude
+    RankNTypes
     TypeFamilies
     TypeOperators

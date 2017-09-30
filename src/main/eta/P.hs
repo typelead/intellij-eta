@@ -5,11 +5,13 @@ module P
   , JavaEnum
   , maybeToJava
   , unsafeNull
+  , unsafePerformJava
   ) where
 
 import Prelude as X
 import Data.Maybe as X
-import Java as X hiding (maybeToJava)
+import Java as X hiding (maybeToJava, pureJava)
+import qualified Java
 
 import qualified Java.Utils
 
@@ -26,3 +28,6 @@ foreign import java unsafe
 
 maybeToJava :: (a <: Object) => Maybe a -> a
 maybeToJava = fromMaybe unsafeNull
+
+unsafePerformJava :: (forall c. Java c a) -> a
+unsafePerformJava = Java.pureJava
