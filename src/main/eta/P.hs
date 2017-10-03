@@ -62,6 +62,9 @@ data {-# CLASS "java.io.File" #-}
 
 foreign import java unsafe "@new" newJFile :: JString -> Java a JFile
 
+getThis :: Class a => Java a a
+getThis = withThis return
+
 {-# INLINE dotImpl #-}
 dotImpl :: Class c => (level (Java c a) -> Java c a) -> c -> level (Java c a) -> Java b a
 dotImpl access cls method = Java $ \o -> case m (unobj cls) of (# _, a #) -> (# o, a #)

@@ -11,11 +11,6 @@ data {-# CLASS "com.intellij.testFramework.LexerTestCase" #-}
   LexerTestCase = LexerTestCase (Object# LexerTestCase)
   deriving Class
 
--- This shouldn't be used as we override getPathToTestDataFile
-foreign export java "getDirPath" getDirPath
-  :: (a <: LexerTestCase) => Java a JString
-getDirPath = return $ unsafeNull :: Java a JString
-
 type instance Inherits LexerTestCase = '[Object, UsefulTestCase]
 
 foreign import java unsafe "printTokens" printTokens
@@ -25,9 +20,10 @@ foreign import java unsafe "printTokens" printTokens
 dirPath :: JString
 dirPath = "src/test/resources/fixtures/eta/sources"
 
-doTest :: Java LexerTestCase ()
+doTest :: (a <: LexerTestCase) => Java a ()
 doTest = do
-  testName <- withThis (<.> getTestNameUpper)
+  this <- getThis
+  testName <- this <.> getTestNameUpper
   let fileName = testName <> ".hs"
   text <- loadFile fileName
   undefined
