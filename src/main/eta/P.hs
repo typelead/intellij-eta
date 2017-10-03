@@ -11,6 +11,7 @@ import Data.Monoid as X
 import GHC.Base (unJava)
 import Java as X hiding (getClass, maybeToJava, maybeFromJava, pureJava, (<.>))
 import qualified Java
+import qualified Java.Exception
 import qualified Java.StringUtils
 import qualified Java.Utils
 import qualified Unsafe.Coerce
@@ -32,6 +33,13 @@ foreign import java unsafe
 foreign import java unsafe
   "@static @field com.typelead.intellij.utils.JavaUtil.emptyJString"
   emptyJString :: JString
+
+foreign import java unsafe
+  "@static com.typelead.intellij.utils.JavaUtil.throwJava"
+  throwJava' :: (e <: Java.Exception.Throwable) => e -> Java a ()
+
+throwJava :: (e <: Java.Exception.Throwable) => e -> Java a b
+throwJava e = throwJava' e >> return undefined
 
 getClass :: Class a => JClass a
 getClass = Java.getClass undefined

@@ -10,7 +10,6 @@ data {-# CLASS "com.typelead.EtaLexerTest extends com.intellij.testFramework.Lex
 
 type instance Inherits EtaLexerTest = '[LexerTestCase]
 
--- This shouldn't be used as we override getPathToTestDataFile
 foreign export java "getDirPath" getDirPath :: Java EtaLexerTest JString
 getDirPath :: Java EtaLexerTest JString
 getDirPath = return $ unsafeNull

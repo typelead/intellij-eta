@@ -22,8 +22,7 @@ dirPath = "src/test/resources/fixtures/eta/sources"
 
 doTest :: (a <: LexerTestCase) => Java a ()
 doTest = do
-  this <- getThis
-  testName <- this <.> getTestNameUpper
+  testName <- getTestNameUpper
   let fileName = testName <> ".hs"
   text <- loadFile fileName
   undefined
