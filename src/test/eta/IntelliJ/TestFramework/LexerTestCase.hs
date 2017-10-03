@@ -14,7 +14,7 @@ data {-# CLASS "com.intellij.testFramework.LexerTestCase" #-}
 -- This shouldn't be used as we override getPathToTestDataFile
 foreign export java "getDirPath" getDirPath
   :: (a <: LexerTestCase) => Java a JString
-getDirPath = unsafeNull
+getDirPath = return $ unsafeNull :: Java a JString
 
 type instance Inherits LexerTestCase = '[Object, UsefulTestCase]
 
@@ -32,13 +32,12 @@ doTest = do
   text <- loadFile fileName
   undefined
   where
-  loadFile :: Java a JString
+  --loadFile :: Java a JString
   loadFile name = doLoadFile dirPath name
 
-  doLoadFile :: JString -> JString -> Java a JString
+  --doLoadFile :: JString -> JString -> Java a JString
   doLoadFile path name = do
-    file <- newJFile $ path <> "/" <> name
-    text <- FileUtil.loadFile file
+    text <- FileUtil.loadFile $ path <> "/" <> name
     return $ trim $ StringUtil.convertLineSeparators text
 
   checkSegments :: JString -> Lexer

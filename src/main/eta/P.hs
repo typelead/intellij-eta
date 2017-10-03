@@ -11,6 +11,7 @@ import Data.Monoid as X
 import GHC.Base (unJava)
 import Java as X hiding (getClass, maybeToJava, maybeFromJava, pureJava, (<.>))
 import qualified Java
+import qualified Java.StringUtils
 import qualified Java.Utils
 import qualified Unsafe.Coerce
 
@@ -27,6 +28,10 @@ data {-# CLASS "java.lang.CharSequence" #-}
 foreign import java unsafe
   "@static @field com.typelead.intellij.utils.JavaUtil.unsafeNull"
   unsafeNull :: (a <: Object) => a
+
+foreign import java unsafe
+  "@static @field com.typelead.intellij.utils.JavaUtil.emptyJString"
+  emptyJString :: JString
 
 getClass :: Class a => JClass a
 getClass = Java.getClass undefined
@@ -80,3 +85,7 @@ newtype Private a = Private { unPrivate :: a }
 
 instance Accessible Private c c where
   (<.>) = dotImpl unPrivate
+
+instance Monoid JString where
+  mempty = emptyJString
+  mappend = Java.StringUtils.concat
