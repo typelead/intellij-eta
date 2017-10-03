@@ -1,5 +1,8 @@
 module FFI.Com.IntelliJ.Lexer.Lexer where
 
+import P
+import FFI.Com.IntelliJ.Psi.Tree.IElementType
+
 data {-# CLASS "com.intellij.lexer.Lexer" #-}
   Lexer = Lexer (Object# Lexer)
   deriving Class
@@ -16,7 +19,7 @@ foreign import java "getState" getState
 -- When Eta FFI supports Maybe in the return type, we can get rid of the
 -- getTokenTypeJava method in favor of this one.
 getTokenType :: (a <: Lexer) => Public (Java a (Maybe IElementType))
-getTokenType = maybeFromJava <$> getTokenTypeJava
+getTokenType = Public $ maybeFromJava <$> unPublic getTokenTypeJava
 
 foreign import java "getTokenType" getTokenTypeJava
   :: (a <: Lexer) => Public (Java a IElementType)

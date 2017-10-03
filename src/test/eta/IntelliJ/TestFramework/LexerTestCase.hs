@@ -2,6 +2,7 @@ module IntelliJ.TestFramework.LexerTestCase where
 
 import P
 import Java.StringUtils (trim)
+import FFI.Com.IntelliJ.Lexer.Lexer
 import qualified FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil as StringUtil
 import qualified FFI.Com.IntelliJ.OpenApi.Util.IO.FileUtil as FileUtil
 import IntelliJ.TestFramework.UsefulTestCase
@@ -11,7 +12,8 @@ data {-# CLASS "com.intellij.testFramework.LexerTestCase" #-}
   deriving Class
 
 -- This shouldn't be used as we override getPathToTestDataFile
-foreign export java "getDirPath" getDirPath :: Java EtaLexerTest JString
+foreign export java "getDirPath" getDirPath
+  :: (a <: LexerTestCase) => Java a JString
 getDirPath = unsafeNull
 
 type instance Inherits LexerTestCase = '[Object, UsefulTestCase]
@@ -28,6 +30,7 @@ doTest = do
   testName <- withThis (<.> getTestNameUpper)
   let fileName = testName <> ".hs"
   text <- loadFile fileName
+  undefined
   where
   loadFile :: Java a JString
   loadFile name = doLoadFile dirPath name
@@ -39,3 +42,4 @@ doTest = do
     return $ trim $ StringUtil.convertLineSeparators text
 
   checkSegments :: JString -> Lexer
+  checkSegments = undefined

@@ -1,6 +1,6 @@
 name:                intellij-eta
 version:             0.0.1-SNAPSHOT
-license:             MIT
+license:             AllRightsReserved
 build-type:          Simple
 cabal-version:       >=1.10
 
@@ -9,11 +9,32 @@ library
   hs-source-dirs:      src/main/eta
   default-language:    Haskell2010
   exposed-modules:
+    FFI.Com.IntelliJ.Psi
+    FFI.Com.IntelliJ.Psi.PsiFile
+    FFI.Com.IntelliJ.Psi.TokenType
+    FFI.Com.IntelliJ.Psi.PsiElement
+    FFI.Com.IntelliJ.Psi.Tree.TokenSet
+    FFI.Com.IntelliJ.Psi.Tree.IFileElementType
+    FFI.Com.IntelliJ.Psi.Tree.IElementType
+    FFI.Com.IntelliJ.Psi.Tree
+    FFI.Com.IntelliJ.Psi.FileViewProvider
+    FFI.Com.IntelliJ.Lang.ParserDefinition
+    FFI.Com.IntelliJ.Lang.Language
+    FFI.Com.IntelliJ.Lang.ParserDefinition.SpaceRequirements
+    FFI.Com.IntelliJ.Lang.ASTNode
+    FFI.Com.IntelliJ.Lexer.Lexer
+    FFI.Com.IntelliJ.OpenApi.Project.Project
+    FFI.Com.IntelliJ.OpenApi.Util.IO.FileUtil
+    FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil
+    FFI.Com.IntelliJ.OpenApi.Project
+    FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.EtaLanguage
     IntelliJ.Plugin.Eta.Lang.Parser.EtaParserDefinition
     IntelliJ.Plugin.Eta.Lang.Parser.EtaParser
     IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
+    P
   default-extensions:
     DataKinds
+    ExistentialQuantification
     FlexibleContexts
     FlexibleInstances
     FunctionalDependencies

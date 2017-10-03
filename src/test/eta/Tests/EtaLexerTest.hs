@@ -1,4 +1,4 @@
-module EtaLexerTest where
+module Tests.EtaLexerTest where
 
 import P
 import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd "$(dirname "$0")/../src/main/eta"
+
+for x in $(find * -name \*.hs | cut -d. -f1 | sed 's/\//./g'); do
+  echo "    $x"
+done

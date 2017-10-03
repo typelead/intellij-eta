@@ -1,6 +1,7 @@
-module Tests.Main where
+module Main where
 
 import P
+import JUnit
+import Tests
 
-main = error "Not implemented"
-
+main = testMain testClasses

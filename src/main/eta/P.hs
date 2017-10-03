@@ -9,10 +9,13 @@ import Control.Monad as X
 import Data.Maybe as X
 import Data.Monoid as X
 import GHC.Base (unJava)
-import Java as X hiding (maybeToJava, maybeFromJava, pureJava, (<.>))
+import Java as X hiding (getClass, maybeToJava, maybeFromJava, pureJava, (<.>))
 import qualified Java
-
 import qualified Java.Utils
+import qualified Unsafe.Coerce
+
+unsafeCoerce :: a -> b
+unsafeCoerce = Unsafe.Coerce.unsafeCoerce
 
 type JavaEnum = Java.Utils.Enum
 
@@ -24,6 +27,20 @@ data {-# CLASS "java.lang.CharSequence" #-}
 foreign import java unsafe
   "@static @field com.typelead.intellij.utils.JavaUtil.unsafeNull"
   unsafeNull :: (a <: Object) => a
+
+getClass :: Class a => JClass a
+getClass = Java.getClass undefined
+
+data JClassAny = forall a. Class a => JClassAny (JClass a)
+
+toJClassAny :: Class a => JClass a -> JClassAny
+toJClassAny = JClassAny
+
+data {-# CLASS "java.lang.Class[]" #-} JClassArray a
+  = JClassArray (Object# (JClassArray a))
+  deriving Class
+
+instance Class a => JArray (JClass a) (JClassArray a)
 
 maybeToJava :: (a <: Object) => Maybe a -> a
 maybeToJava = fromMaybe unsafeNull
