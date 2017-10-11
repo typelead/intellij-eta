@@ -44,3 +44,13 @@ repositories {
 
 dependencies {
 }
+
+task hpack(type: Exec) {
+    commandLine 'hpack'
+}
+
+afterEvaluate {
+    compileEta.dependsOn(hpack)
+    jar.dependsOn(compileEta)
+    test.dependsOn(testEta)
+}

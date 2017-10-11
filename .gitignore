@@ -3,3 +3,4 @@
 .idea/
 build/
 cabal.sandbox.config
+intellij-eta.cabal
