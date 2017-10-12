@@ -5,9 +5,11 @@ module P
   ) where
 
 import Prelude as X hiding (String, head, tail)
+import Control.Exception as X
 import Control.Monad as X
 import Data.Maybe as X
 import Data.Monoid as X
+import Data.Typeable
 import GHC.Base (unJava)
 import Java as X hiding (getClass, maybeToJava, maybeFromJava, pureJava, (<.>))
 import qualified Java
@@ -34,39 +36,6 @@ foreign import java unsafe
 foreign import java unsafe
   "@static @field com.typelead.intellij.utils.JavaUtil.emptyJString"
   emptyJString :: JString
-
-foreign import java unsafe
-  "@static com.typelead.intellij.utils.JavaUtil.throwJava"
-  throwJava' :: (e <: Java.Exception.Throwable) => e -> Java a ()
-
-throwJava :: (e <: Java.Exception.Throwable) => e -> Java a b
-throwJava e = throwJava' e >> return undefined
-
-foreign import java unsafe
-  "@static com.typelead.intellij.utils.JavaUtil.tryJava" tryJava'
-  :: (Class e, e <: Java.Exception.Throwable)
-  => JClass e -> JSupplier a -> Java.Do.Function e a -> Java b a
-
-tryJava
-  :: (Class e, e <: Java.Exception.Throwable, a <: Object)
-  => Java (JSupplier a) a
-  -> (e -> Java (JFunction e a) a)
-  -> Java b a
-tryJava f g = tryJava' getClass (jSupplier f) (jFunction g)
-
-type JFunction = Java.Do.Function
-
-jFunction :: (t <: Object, r <: Object) => (t -> Java (JFunction t r) r) -> JFunction t r
-jFunction = Java.Do.fun
-
-data {-# CLASS "java.util.function.Supplier" #-}
-  JSupplier a = JSupplier (Object# (JSupplier a))
-  deriving Class
-
-foreign import java unsafe "@wrapper get" jSupplier
-  :: (a <: Object) => Java (JSupplier a) a -> JSupplier a
-
-type instance Inherits (JSupplier a) = '[Object]
 
 getClass :: Class a => JClass a
 getClass = Java.getClass undefined
@@ -131,3 +100,54 @@ instance Monoid JString where
 foreign import java unsafe trim :: JString -> JString
 
 foreign import java unsafe "@static java.io.File.separator" jFileSeparator :: JString
+
+-- Java Functions
+
+type JFunction = Java.Do.Function
+
+jFunction :: (t <: Object, r <: Object) => (t -> Java (JFunction t r) r) -> JFunction t r
+jFunction = Java.Do.fun
+
+data {-# CLASS "java.util.function.Supplier" #-}
+  JSupplier a = JSupplier (Object# (JSupplier a))
+  deriving Class
+
+foreign import java unsafe "@wrapper get" jSupplier
+  :: (a <: Object) => Java (JSupplier a) a -> JSupplier a
+
+type instance Inherits (JSupplier a) = '[Object]
+
+-- Java Exceptions
+
+type JThrowable = Java.Exception.Throwable
+type JException = Java.Exception.JException
+
+data {-# CLASS "java.io.FileNotFoundException" #-}
+  FileNotFoundException = FileNotFoundException (Object# FileNotFoundException)
+  deriving (Class, Typeable, Show)
+
+type instance Inherits FileNotFoundException = '[Object, JThrowable, JException]
+
+-- foreign import java unsafe
+--   "@static com.typelead.intellij.utils.JavaUtil.tryJava" tryJava'
+--   :: (Class e, e <: JThrowable, a <: Object)
+--   => JClass e -> JSupplier a -> Java.Do.Function e a -> Java b a
+--
+-- tryJava
+--   :: (Class e, e <: JThrowable, a <: Object)
+--   => Java (JSupplier a) a
+--   -> (e -> Java (JFunction e a) a)
+--   -> Java b a
+-- tryJava f g = tryJava' getClass (jSupplier f) (jFunction g)
+
+foreign import java unsafe
+  "@static com.typelead.intellij.utils.JavaUtil.throwJava"
+  throwJava' :: (e <: JThrowable) => e -> Java a ()
+
+throwJava :: (e <: JThrowable) => e -> Java a b
+throwJava e = throwJava' e >> return undefined
+
+throwJavaM :: (e <: JThrowable) => Java a e -> Java a b
+throwJavaM me = do
+  e <- me
+  throwJava e

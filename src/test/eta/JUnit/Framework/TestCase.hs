@@ -9,3 +9,7 @@ data {-# CLASS "junit.framework.TestCase" #-}
 foreign import java unsafe "@static junit.framework.TestCase.assertEquals" assertEquals
   :: (a <: Object, b <: Object)
   => a -> b -> Java c ()
+
+foreign import java unsafe
+  "@static junit.framework.TestCase.fail"
+  fail :: JString -> Java a ()

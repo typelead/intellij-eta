@@ -1,9 +1,14 @@
 module Tests.EtaLexerTest where
 
 import P
+import FFI.Com.IntelliJ.RT.Execution.JUnit.FileComparisonFailure
+import qualified FFI.Com.IntelliJ.OpenApi.Util.IO.FileUtil as FileUtil
+import FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil
 import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
+import qualified JUnit.Framework.TestCase as TestCase
 import IntelliJ.TestFramework.LexerTestCase
 import IntelliJ.TestFramework.UsefulTestCase
+import IntelliJ.TestFramework.VfsTestUtil
 
 data {-# CLASS "com.typelead.EtaLexerTest extends com.intellij.testFramework.LexerTestCase" #-}
   EtaLexerTest = EtaLexerTest (Object# EtaLexerTest)
@@ -23,36 +28,41 @@ createLexer = newEtaLexer
 
 doTest :: Java EtaLexerTest ()
 doTest = do
-  testName <- getTestNameUpper
+  this <- getThis
+  testName <- this <.> getTestNameUpper
   let fileName = testName <> ".hs"
-  text <- loadFile
-  result <- printTokens text 0
-  doCheckResult (expectPath <> jfileSeparator <> "expected") (testName <> ".txt") result
+  text <- loadFile fileName
+  result <- this <.> printTokens text 0
+  doCheckResult (myExpectPath <> jFileSeparator <> "expected") (testName <> ".txt") result
   where
-  loadFile name = doLoadFile fileName
+  srcPath = dirPath <> jFileSeparator <> "sources"
 
-  doCheckResult :: JString -> JString -> JString -> Java a ()
-  doCheckResult fullPath targetDataName tokenResult = do
-    let text = trim tokenResult
-        expectedFileName = fullPath <> jFileSeparator <> targetDataName
+  myExpectPath = dirPath <> jFileSeparator <> "lexer"
 
--- Adaptation of CabalLexerTestBase
--- doTest :: (a <: LexerTestCase) => Java a ()
--- doTest = do
---   testName <- getTestNameUpper
---   let fileName = testName <> ".hs"
---   text <- loadFile fileName
---   lexer <- createLexer
---   checkSegments text lexer
---   where
---   loadFile name = doLoadFile dirPath name
---
---   doLoadFile path name = do
---     text <- FileUtil.loadFile $ path <> "/" <> name
---     return $ trim $ StringUtil.convertLineSeparators text
---
---   checkSegments :: JString -> Lexer
---   checkSegments = undefined
+  loadFile name = doLoadFile srcPath name
+
+  doLoadFile myFullDataPath name =
+    convertLineSeparators . trim <$> FileUtil.loadFile (myFullDataPath <> jFileSeparator <> name)
+
+  doCheckResult :: forall a. JString -> JString -> JString -> Java a ()
+  doCheckResult fullPath targetDataName tokenResult = run $ do
+    expectedText <- doLoadFile fullPath targetDataName
+    when (expectedText /= text) $ throwFileComparisonFailure expectedText
+    where
+    text = trim tokenResult
+
+    expectedFileName = fullPath <> jFileSeparator <> targetDataName
+
+    throwFileComparisonFailure :: forall a. JString -> Java a ()
+    throwFileComparisonFailure expectedText =
+      throwJavaM $
+        newFileComparisonFailure
+          targetDataName expectedText text expectedFileName
+
+    run :: forall b. (forall a. Java a ()) -> Java b ()
+    run f = io $ catch (java f) $ \(e :: FileNotFoundException) -> java $ do
+      overwriteTestData expectedFileName text
+      TestCase.fail $ ("No output text found. File " <> expectedFileName <> "created." :: JString)
 
 foreign export java "testArrow00001" testArrow00001 :: Java EtaLexerTest ()
 testArrow00001 :: Java EtaLexerTest ()
