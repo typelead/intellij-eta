@@ -11,6 +11,7 @@ import Data.Monoid as X
 import GHC.Base (unJava)
 import Java as X hiding (getClass, maybeToJava, maybeFromJava, pureJava, (<.>))
 import qualified Java
+import qualified Java.Do
 import qualified Java.Exception
 import qualified Java.StringUtils
 import qualified Java.Utils
@@ -40,6 +41,32 @@ foreign import java unsafe
 
 throwJava :: (e <: Java.Exception.Throwable) => e -> Java a b
 throwJava e = throwJava' e >> return undefined
+
+foreign import java unsafe
+  "@static com.typelead.intellij.utils.JavaUtil.tryJava" tryJava'
+  :: (Class e, e <: Java.Exception.Throwable)
+  => JClass e -> JSupplier a -> Java.Do.Function e a -> Java b a
+
+tryJava
+  :: (Class e, e <: Java.Exception.Throwable, a <: Object)
+  => Java (JSupplier a) a
+  -> (e -> Java (JFunction e a) a)
+  -> Java b a
+tryJava f g = tryJava' getClass (jSupplier f) (jFunction g)
+
+type JFunction = Java.Do.Function
+
+jFunction :: (t <: Object, r <: Object) => (t -> Java (JFunction t r) r) -> JFunction t r
+jFunction = Java.Do.fun
+
+data {-# CLASS "java.util.function.Supplier" #-}
+  JSupplier a = JSupplier (Object# (JSupplier a))
+  deriving Class
+
+foreign import java unsafe "@wrapper get" jSupplier
+  :: (a <: Object) => Java (JSupplier a) a -> JSupplier a
+
+type instance Inherits (JSupplier a) = '[Object]
 
 getClass :: Class a => JClass a
 getClass = Java.getClass undefined
@@ -100,3 +127,7 @@ instance Accessible Private c c where
 instance Monoid JString where
   mempty = emptyJString
   mappend = Java.StringUtils.concat
+
+foreign import java unsafe trim :: JString -> JString
+
+foreign import java unsafe "@static java.io.File.separator" jFileSeparator :: JString
