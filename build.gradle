@@ -49,8 +49,53 @@ task hpack(type: Exec) {
     commandLine 'hpack'
 }
 
-afterEvaluate {
-    compileEta.dependsOn(hpack)
-    jar.dependsOn(compileEta)
-    test.dependsOn(testEta)
+compileEta.dependsOn(hpack)
+
+prepareSandbox {
+    doLast {
+        copyEtaRuntimeToPluginSandbox(false)
+    }
+}
+
+prepareSandbox.dependsOn(compileEta, runtimeEta)
+
+prepareTestingSandbox {
+    doLast {
+        copyEtaRuntimeToPluginSandbox(true)
+    }
+}
+
+prepareTestingSandbox.dependsOn(testCompileEta, runtimeEta)
+
+def getSandboxLibDir(Boolean test) {
+    def pluginsDir = test ? "plugins-test" : "plugins"
+    "${intellij.sandboxDirectory}/$pluginsDir/${intellij.pluginName}/lib/"
+}
+
+def copyEtaRuntimeToPluginSandbox(Boolean test) {
+    def dest = getSandboxLibDir(test)
+    configurations.etaRuntime.dependencies.forEach { deps ->
+        deps.resolve().forEach { dep ->
+            project.copy {
+                from dep
+                into dest
+            }
+        }
+    }
+}
+
+// Hack to trick junit into thinking we have java tests.
+testClasses {
+    doLast {
+        copy {
+            from zipTree("build/etlas/dist/build/test/test.jar")
+            into "build/classes/java/test"
+        }
+    }
+}
+
+testClasses.dependsOn(testCompileEta)
+
+test {
+    classpath = classpath + configurations.etaRuntime
 }
