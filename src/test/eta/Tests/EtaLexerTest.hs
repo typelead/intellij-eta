@@ -1,6 +1,7 @@
 module Tests.EtaLexerTest where
 
 import P
+import FFI.Com.IntelliJ.Lexer.Lexer (Lexer)
 import FFI.Com.IntelliJ.RT.Execution.JUnit.FileComparisonFailure
 import qualified FFI.Com.IntelliJ.OpenApi.Util.IO.FileUtil as FileUtil
 import FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil
@@ -10,11 +11,15 @@ import IntelliJ.TestFramework.LexerTestCase
 import IntelliJ.TestFramework.UsefulTestCase
 import IntelliJ.TestFramework.VfsTestUtil
 
-data {-# CLASS "com.typelead.EtaLexerTest extends com.intellij.testFramework.LexerTestCase" #-}
+-- TODO: We currently have to work around not being able to access protected methods
+-- by extending a wrapper class which changes the access level to public.
+-- data {-# CLASS "com.typelead.EtaLexerTest extends com.intellij.testFramework.LexerTestCase" #-}
+data {-# CLASS "com.typelead.EtaLexerTest extends com.typelead.intellij.test.LexerTestCaseWrapper" #-}
   EtaLexerTest = EtaLexerTest (Object# EtaLexerTest)
   deriving Class
 
-type instance Inherits EtaLexerTest = '[LexerTestCase]
+-- type instance Inherits EtaLexerTest = '[LexerTestCase]
+type instance Inherits EtaLexerTest = '[UsefulTestCase, LexerTestCase]
 
 foreign export java "getDirPath" getDirPath :: Java EtaLexerTest JString
 getDirPath :: Java EtaLexerTest JString
@@ -23,8 +28,8 @@ getDirPath = return dirPath
 dirPath :: JString
 dirPath = "src/test/resources/fixtures/eta"
 
-foreign export java "createLexer" createLexer :: Java EtaLexerTest EtaLexer
-createLexer = newEtaLexer
+foreign export java "createLexer" createLexer :: Java EtaLexerTest Lexer
+createLexer = superCast <$> newEtaLexer
 
 doTest :: Java EtaLexerTest ()
 doTest = do

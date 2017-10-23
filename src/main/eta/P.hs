@@ -80,7 +80,7 @@ class Accessible level c b where
 
 newtype Public a = Public { unPublic :: a }
 
-instance Accessible Public c b where
+instance (b <: c) => Accessible Public c b where
   (<.>) = dotImpl unPublic
 
 newtype Protected a = Protected { unProtected :: a }
@@ -99,7 +99,7 @@ instance Monoid JString where
 
 foreign import java unsafe trim :: JString -> JString
 
-foreign import java unsafe "@static java.io.File.separator" jFileSeparator :: JString
+foreign import java unsafe "@static @field java.io.File.separator" jFileSeparator :: JString
 
 -- Java Functions
 

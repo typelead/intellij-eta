@@ -14,5 +14,5 @@ You will also need the command line tool [hpack](https://github.com/sol/hpack)
 ## Testing
 
 ```
-% ./gradlew testEta
+% ./gradlew test
 ```

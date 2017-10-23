@@ -1,11 +1,14 @@
 module IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer where
 
 import P
+import FFI.Com.IntelliJ.Lexer.Lexer (Lexer)
 import FFI.Com.IntelliJ.Psi.Tree (IElementType)
 
 data {-# CLASS "com.typelead.intellij.plugin.eta.lang.lexer.EtaLexer extends com.intellij.lexer.LexerBase" #-}
   EtaLexer = EtaLexer (Object# EtaLexer)
   deriving Class
+
+type instance Inherits EtaLexer = '[Object, Lexer]
 
 foreign import java unsafe "@new" newEtaLexer :: Java a EtaLexer
 
