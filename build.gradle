@@ -61,7 +61,12 @@ task addEtaParserDep(type: Exec) {
   dependsOn configureAddEtaParserDep
 }
 
-compileEta.dependsOn(hpack, addEtaParserDep)
+task makeEtaParser(type: Exec) {
+  workingDir file('eta-parser')
+  commandLine 'make'
+}
+
+compileEta.dependsOn(hpack, addEtaParserDep, makeEtaParser)
 
 prepareSandbox {
   doLast {

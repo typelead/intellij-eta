@@ -1,6 +1,7 @@
 name: intellij-eta
 version: '0.0.1-SNAPSHOT'
 license: AllRightsReserved
+
 default-extensions:
 - DataKinds
 - ExistentialQuantification
@@ -17,14 +18,17 @@ default-extensions:
 - TypeFamilies
 - TypeOperators
 - UnboxedTuples
+
+dependencies:
+- base >=4.8 && <4.9
+- eta-parser
+
 library:
   source-dirs: src/main/eta
-  dependencies:
-  - base >=4.8 && <4.9
+
 tests:
   test:
     main: Main.hs
     source-dirs: src/test/eta
     dependencies:
-    - base
     - intellij-eta

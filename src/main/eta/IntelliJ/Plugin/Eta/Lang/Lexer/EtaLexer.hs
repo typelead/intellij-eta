@@ -3,6 +3,7 @@ module IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer where
 import P
 import FFI.Com.IntelliJ.Lexer.Lexer (Lexer)
 import FFI.Com.IntelliJ.Psi.Tree (IElementType)
+import qualified Language.Eta.Parser.Lexer as L
 
 data {-# CLASS "com.typelead.intellij.plugin.eta.lang.lexer.EtaLexer extends com.intellij.lexer.LexerBase" #-}
   EtaLexer = EtaLexer (Object# EtaLexer)
