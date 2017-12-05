@@ -1,0 +1,3 @@
+[submodule "eta-parser"]
+	path = eta-parser
+	url = git@bitbucket.org:carymrobbins/eta-parser.git
