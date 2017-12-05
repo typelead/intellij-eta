@@ -3,18 +3,32 @@ module IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer where
 import P
 import FFI.Com.IntelliJ.Lexer.Lexer (Lexer)
 import FFI.Com.IntelliJ.Psi.Tree (IElementType)
+import Data.IORef
+import Foreign.StablePtr
 import qualified Language.Eta.Parser.Lexer as L
 
-data {-# CLASS "com.typelead.intellij.plugin.eta.lang.lexer.EtaLexer extends com.intellij.lexer.LexerBase" #-}
+data {-# CLASS "com.typelead.intellij.plugin.eta.lang.lexer.EtaLexer extends com.typelead.intellij.plugin.eta.lang.lexer.AbstractEtaLexer" #-}
   EtaLexer = EtaLexer (Object# EtaLexer)
   deriving Class
 
 type instance Inherits EtaLexer = '[Object, Lexer]
 
+foreign import java unsafe "@field lexerPtr" getLexerPtr :: Java EtaLexer (StablePtr (IORef L.PState))
+
+foreign import java unsafe "@field lexerPtr" setLexerPtr :: StablePtr (IORef L.PState) -> Java EtaLexer ()
+
 foreign import java unsafe "@new" newEtaLexer :: Java a EtaLexer
 
 foreign export java "start" start :: CharSequence -> Int -> Int -> Int -> Java EtaLexer ()
-start buffer startOffset endOffset initialState = undefined
+start buffer startOffset endOffset initialState = do
+  ptr <- mkPtr
+  setLexerPtr ptr
+  where
+  mkPtr = io $ newIORef pState >>= newStablePtr
+  pState = L.mkPState flags stringBuf srcLoc
+  flags = undefined -- DynFlags
+  stringBuf = undefined -- buffer.substring(startOffset, endOffset).to[StringBuffer]
+  srcLoc = undefined -- RealSrcLoc
 
 foreign export java "getState" getState :: Java EtaLexer Int
 getState = return 0
