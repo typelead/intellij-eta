@@ -51,22 +51,16 @@ task hpack(type: Exec) {
   commandLine 'hpack'
 }
 
-task configureAddEtaParserDep {
-  doLast {
-    addEtaParserDep.commandLine = [eta.etlasBinary, 'sandbox', 'add-source', 'eta-parser']
-  }
-}
-
-task addEtaParserDep(type: Exec) {
-  dependsOn configureAddEtaParserDep
+sandboxAddSourcesEta {
+  sources = ['eta-parser']
 }
 
 task makeEtaParser(type: Exec) {
   workingDir file('eta-parser')
-  commandLine 'make'
+  commandLine = ['make', 'sources']
 }
 
-compileEta.dependsOn(hpack, addEtaParserDep, makeEtaParser)
+installDepsEta.dependsOn(hpack, makeEtaParser)
 
 prepareSandbox {
   doLast {
@@ -113,6 +107,7 @@ def copyEtaRuntimeToPluginSandbox(Boolean test) {
 
 // Hack to trick junit into thinking we have java tests.
 testClasses {
+  dependsOn testCompileEta
   doLast {
     copy {
       from zipTree("build/etlas/dist/build/test/test.jar")
@@ -121,9 +116,8 @@ testClasses {
   }
 }
 
-testClasses.dependsOn(testCompileEta)
-
 task configureTest {
+  dependsOn compileEta
   doLast {
     test.classpath += files(getEtaRuntimeClasspath())
   }
