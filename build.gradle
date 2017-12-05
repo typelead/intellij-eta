@@ -1,16 +1,16 @@
 // Depend on local gradle-eta plugin.
 buildscript {
-    repositories {
-        mavenLocal()
+  repositories {
+    mavenLocal()
 
-        dependencies {
-            classpath 'com.typelead:gradle-eta:0.0.1-SNAPSHOT'
-        }
+    dependencies {
+      classpath 'com.typelead:gradle-eta:0.0.1-SNAPSHOT'
     }
+  }
 }
 
 plugins {
-    id "org.jetbrains.intellij" version "0.2.16"
+  id "org.jetbrains.intellij" version "0.2.16"
 }
 
 group 'com.typelead'
@@ -20,82 +20,82 @@ apply plugin: 'eta'
 apply plugin: 'org.jetbrains.intellij'
 
 ext {
-    javaVersion = '1.8'
+  javaVersion = '1.8'
 }
 
 intellij {
-    version = '2017.2'
-    pluginName = 'IntelliJ-Eta'
-    // Makes it easy to support multiple intellij versions.
-    // If we want to set this to true, we should find a way to cross build
-    // against multiple intellij versions.
-    updateSinceUntilBuild = false
+  version = '2017.2'
+  pluginName = 'IntelliJ-Eta'
+  // Makes it easy to support multiple intellij versions.
+  // If we want to set this to true, we should find a way to cross build
+  // against multiple intellij versions.
+  updateSinceUntilBuild = false
 }
 
 eta {
-    etlasVersion = '1.0.2.0'
+  etlasVersion = '1.0.2.0'
 }
 
 sourceCompatibility = 1.8
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
 }
 
 task hpack(type: Exec) {
-    commandLine 'hpack'
+  commandLine 'hpack'
 }
 
 compileEta.dependsOn(hpack)
 
 prepareSandbox {
-    doLast {
-        copyEtaRuntimeToPluginSandbox(false)
-    }
+  doLast {
+    copyEtaRuntimeToPluginSandbox(false)
+  }
 }
 
 prepareSandbox.dependsOn(compileEta, runtimeEta)
 
 prepareTestingSandbox {
-    doLast {
-        copyEtaRuntimeToPluginSandbox(true)
-    }
+  doLast {
+    copyEtaRuntimeToPluginSandbox(true)
+  }
 }
 
 prepareTestingSandbox.dependsOn(testCompileEta, runtimeEta)
 
 def getSandboxLibDir(Boolean test) {
-    def pluginsDir = test ? "plugins-test" : "plugins"
-    "${intellij.sandboxDirectory}/$pluginsDir/${intellij.pluginName}/lib/"
+  def pluginsDir = test ? "plugins-test" : "plugins"
+  "${intellij.sandboxDirectory}/$pluginsDir/${intellij.pluginName}/lib/"
 }
 
 def copyEtaRuntimeToPluginSandbox(Boolean test) {
-    def dest = getSandboxLibDir(test)
-    configurations.etaRuntime.dependencies.forEach { deps ->
-        deps.resolve().forEach { dep ->
-            project.copy {
-                from dep
-                into dest
-            }
-        }
+  def dest = getSandboxLibDir(test)
+  configurations.etaRuntime.dependencies.forEach { deps ->
+    deps.resolve().forEach { dep ->
+      project.copy {
+        from dep
+        into dest
+      }
     }
+  }
 }
 
 // Hack to trick junit into thinking we have java tests.
 testClasses {
-    doLast {
-        copy {
-            from zipTree("build/etlas/dist/build/test/test.jar")
-            into "build/classes/java/test"
-        }
+  doLast {
+    copy {
+      from zipTree("build/etlas/dist/build/test/test.jar")
+      into "build/classes/java/test"
     }
+  }
 }
 
 testClasses.dependsOn(testCompileEta)
 
 test {
-    classpath = classpath + configurations.etaRuntime
+  classpath = classpath + configurations.etaRuntime
 }
