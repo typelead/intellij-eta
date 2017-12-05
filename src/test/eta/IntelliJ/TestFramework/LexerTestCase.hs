@@ -14,4 +14,4 @@ type instance Inherits LexerTestCase = '[Object, UsefulTestCase]
 
 foreign import java unsafe "printTokens" printTokens
   :: (a <: LexerTestCase)
-  => JString -> Int -> Protected (Java a JString)
+  => JString -> Int -> Java a JString

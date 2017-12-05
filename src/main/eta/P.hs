@@ -11,7 +11,7 @@ import Data.Maybe as X
 import Data.Monoid as X
 import Data.Typeable
 import GHC.Base (unJava)
-import Java as X hiding (getClass, maybeToJava, maybeFromJava, pureJava, (<.>))
+import Java as X hiding (getClass, maybeToJava, maybeFromJava, pureJava)
 import qualified Java
 import qualified Java.Do
 import qualified Java.Exception
@@ -63,35 +63,11 @@ foreign import java unsafe "@new" newJFile :: JString -> Java a JFile
 getThis :: Class a => Java a a
 getThis = withThis return
 
-{-# INLINE dotImpl #-}
-dotImpl :: Class c => (level (Java c a) -> Java c a) -> c -> level (Java c a) -> Java b a
-dotImpl access cls method = Java $ \o -> case m (unobj cls) of (# _, a #) -> (# o, a #)
-  where
-  Java m = access method
-
-class Accessible level c b where
-  (<.>) :: Class c => c -> level (Java c a) -> Java b a
-
-newtype Public a = Public { unPublic :: a }
-
-instance (b <: c) => Accessible Public c b where
-  (<.>) = dotImpl unPublic
-
-newtype Protected a = Protected { unProtected :: a }
-
-instance (b <: c) => Accessible Protected c b where
-  (<.>) = dotImpl unProtected
-
-newtype Private a = Private { unPrivate :: a }
-
-instance Accessible Private c c where
-  (<.>) = dotImpl unPrivate
-
 instance Monoid JString where
   mempty = emptyJString
   mappend = jStringConcat
 
-foreign import java unsafe trim :: JString -> JString
+foreign import java unsafe "trim" trim :: JString -> JString
 
 foreign import java unsafe "concat" jStringConcat :: JString -> JString -> JString
 
