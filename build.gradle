@@ -111,7 +111,7 @@ testClasses {
   doLast {
     copy {
       from zipTree("build/etlas/dist/build/test/test.jar")
-      into "build/classes/java/test"
+      into "build/classes/test"
     }
   }
 }
