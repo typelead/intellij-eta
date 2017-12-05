@@ -1,7 +1,6 @@
 module IntelliJ.TestFramework.LexerTestCase where
 
 import P
-import Java.StringUtils (trim)
 import FFI.Com.IntelliJ.Lexer.Lexer
 import qualified FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil as StringUtil
 import qualified FFI.Com.IntelliJ.OpenApi.Util.IO.FileUtil as FileUtil

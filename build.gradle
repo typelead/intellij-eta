@@ -1,3 +1,5 @@
+import com.typelead.gradle.utils.EtaRuntimeUtils
+
 // Depend on local gradle-eta plugin.
 buildscript {
   repositories {
@@ -33,7 +35,7 @@ intellij {
 }
 
 eta {
-  etlasVersion = '1.0.2.0'
+  useSystemEtlas = true
 }
 
 sourceCompatibility = 1.8
@@ -49,7 +51,17 @@ task hpack(type: Exec) {
   commandLine 'hpack'
 }
 
-compileEta.dependsOn(hpack)
+task configureAddEtaParserDep {
+  doLast {
+    addEtaParserDep.commandLine = [eta.etlasBinary, 'sandbox', 'add-source', 'eta-parser']
+  }
+}
+
+task addEtaParserDep(type: Exec) {
+  dependsOn configureAddEtaParserDep
+}
+
+compileEta.dependsOn(hpack, addEtaParserDep)
 
 prepareSandbox {
   doLast {
@@ -57,7 +69,7 @@ prepareSandbox {
   }
 }
 
-prepareSandbox.dependsOn(compileEta, runtimeEta)
+prepareSandbox.dependsOn(compileEta)
 
 prepareTestingSandbox {
   doLast {
@@ -65,21 +77,31 @@ prepareTestingSandbox {
   }
 }
 
-prepareTestingSandbox.dependsOn(testCompileEta, runtimeEta)
+prepareTestingSandbox.dependsOn(testCompileEta)
 
 def getSandboxLibDir(Boolean test) {
   def pluginsDir = test ? "plugins-test" : "plugins"
   "${intellij.sandboxDirectory}/$pluginsDir/${intellij.pluginName}/lib/"
 }
 
+Set<File> getEtaRuntimeClasspath() {
+  if (eta.etlasBinary == null) {
+    throw new GradleException(
+      "Cannot getEtaRuntimeClasspath, eta.etlasBinary is null; "
+      + "consider running in a doLast { .. } block instead."
+    )
+  }
+  def res = EtaRuntimeUtils.getRuntimeClasspath(project, eta, "lib:intellij-eta")
+  logger.info("Using eta runtime classpath: $res")
+  res
+}
+
 def copyEtaRuntimeToPluginSandbox(Boolean test) {
   def dest = getSandboxLibDir(test)
-  configurations.etaRuntime.dependencies.forEach { deps ->
-    deps.resolve().forEach { dep ->
-      project.copy {
-        from dep
-        into dest
-      }
+  getEtaRuntimeClasspath().forEach { dep ->
+    project.copy {
+      from dep.canonicalPath
+      into dest
     }
   }
 }
@@ -96,6 +118,12 @@ testClasses {
 
 testClasses.dependsOn(testCompileEta)
 
+task configureTest {
+  doLast {
+    test.classpath += files(getEtaRuntimeClasspath())
+  }
+}
+
 test {
-  classpath = classpath + configurations.etaRuntime
+  dependsOn configureTest
 }

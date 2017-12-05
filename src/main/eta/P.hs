@@ -15,7 +15,6 @@ import Java as X hiding (getClass, maybeToJava, maybeFromJava, pureJava, (<.>))
 import qualified Java
 import qualified Java.Do
 import qualified Java.Exception
-import qualified Java.StringUtils
 import qualified Java.Utils
 import qualified Unsafe.Coerce
 
@@ -23,11 +22,6 @@ unsafeCoerce :: a -> b
 unsafeCoerce = Unsafe.Coerce.unsafeCoerce
 
 type JavaEnum = Java.Utils.Enum
-
--- TODO: Shouldn't this be brought in from GHC.Types by Prelude?
-data {-# CLASS "java.lang.CharSequence" #-}
-  CharSequence = CharSequence (Object# CharSequence)
-  deriving Class
 
 foreign import java unsafe
   "@static @field com.typelead.intellij.utils.JavaUtil.unsafeNull"
@@ -95,9 +89,11 @@ instance Accessible Private c c where
 
 instance Monoid JString where
   mempty = emptyJString
-  mappend = Java.StringUtils.concat
+  mappend = jStringConcat
 
 foreign import java unsafe trim :: JString -> JString
+
+foreign import java unsafe "concat" jStringConcat :: JString -> JString -> JString
 
 foreign import java unsafe "@static @field java.io.File.separator" jFileSeparator :: JString
 
