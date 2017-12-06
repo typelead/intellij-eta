@@ -13,13 +13,17 @@ import IntelliJ.TestFramework.VfsTestUtil
 
 -- TODO: We currently have to work around not being able to access protected methods
 -- by extending a wrapper class which changes the access level to public.
--- data {-# CLASS "com.typelead.EtaLexerTest extends com.intellij.testFramework.LexerTestCase" #-}
-data {-# CLASS "com.typelead.EtaLexerTest extends com.typelead.intellij.test.LexerTestCaseWrapper" #-}
+data {-# CLASS "com.typelead.intellij.test.LexerTestCaseWrapper" #-}
+  LexerTestCaseWrapper = LexerTestCaseWrapper (Object# LexerTestCaseWrapper)
+  deriving Class
+
+type instance Inherits LexerTestCaseWrapper = '[LexerTestCase]
+
+data {-# CLASS "com.typelead.EtaLexerTest" #-}
   EtaLexerTest = EtaLexerTest (Object# EtaLexerTest)
   deriving Class
 
--- type instance Inherits EtaLexerTest = '[LexerTestCase]
-type instance Inherits EtaLexerTest = '[UsefulTestCase, LexerTestCase]
+type instance Inherits EtaLexerTest = '[LexerTestCaseWrapper]
 
 foreign export java "getDirPath" getDirPath :: Java EtaLexerTest JString
 getDirPath :: Java EtaLexerTest JString

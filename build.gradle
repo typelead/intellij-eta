@@ -12,7 +12,7 @@ buildscript {
 }
 
 plugins {
-  id "org.jetbrains.intellij" version "0.2.16"
+  id "org.jetbrains.intellij" version "0.2.17"
 }
 
 group 'com.typelead'
@@ -26,12 +26,13 @@ ext {
 }
 
 intellij {
-  version = '2017.2'
+  version = '2017.3'
   pluginName = 'IntelliJ-Eta'
   // Makes it easy to support multiple intellij versions.
   // If we want to set this to true, we should find a way to cross build
   // against multiple intellij versions.
   updateSinceUntilBuild = false
+  instrumentCode = false
 }
 
 eta {
@@ -105,42 +106,24 @@ def copyEtaRuntimeToPluginSandbox(Boolean test) {
   }
 }
 
-// TODO: Avoiding the IncompatibleClassChangeError by running our tests manually
 // Hack to trick junit into thinking we have java tests.
-//testClasses {
-//  dependsOn testCompileEta
-//  doLast {
-//    copy {
-//      from zipTree("build/etlas/dist/build/test/test.jar")
-//      into "build/classes/test"
-//    }
-//  }
-//}
-//
-//task configureTest {
-//  dependsOn testCompileEta
-//  doLast {
-//    test.classpath += files(getEtaRuntimeClasspath())
-//    test.classpath += files("build/etlas/dist/build/test/test.jar")
-//  }
-//}
-//
-//test {
-//  dependsOn configureTest
-//  jvmArgs += ['-verbose']
-//}
-
-task configureTestPlugin {
+testClasses {
   dependsOn testCompileEta
   doLast {
-    testPlugin.classpath += files(getEtaRuntimeClasspath())
-    testPlugin.classpath += files("build/etlas/dist/build/test/test.jar")
+    copy {
+      from zipTree("build/etlas/dist/build/test/test.jar")
+      into "build/classes/test"
+    }
   }
 }
 
-task testPlugin(type: JavaExec) {
-  dependsOn configureTestPlugin
-  main 'eta.main'
+task configureTest {
+  dependsOn testCompileEta
+  doLast {
+    test.classpath += files(getEtaRuntimeClasspath())
+  }
 }
 
-test.dependsOn(testPlugin)
+test {
+  dependsOn configureTest
+}

@@ -7,11 +7,17 @@ import Data.IORef
 import Foreign.StablePtr
 import qualified Language.Eta.Parser.Lexer as L
 
-data {-# CLASS "com.typelead.intellij.plugin.eta.lang.lexer.EtaLexer extends com.typelead.intellij.plugin.eta.lang.lexer.AbstractEtaLexer" #-}
+data {-# CLASS "com.typelead.intellij.plugin.eta.lang.lexer.AbstractEtaLexer" #-}
+  AbstractEtaLexer = AbstractEtaLexer (Object# AbstractEtaLexer)
+  deriving Class
+
+type instance Inherits AbstractEtaLexer = '[Object, Lexer]
+
+data {-# CLASS "com.typelead.intellij.plugin.eta.lang.lexer.EtaLexer" #-}
   EtaLexer = EtaLexer (Object# EtaLexer)
   deriving Class
 
-type instance Inherits EtaLexer = '[Object, Lexer]
+type instance Inherits EtaLexer = '[AbstractEtaLexer]
 
 foreign import java unsafe "@field lexerPtr" getLexerPtr :: Java EtaLexer (StablePtr (IORef L.PState))
 
