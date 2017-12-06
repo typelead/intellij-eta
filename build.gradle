@@ -105,24 +105,42 @@ def copyEtaRuntimeToPluginSandbox(Boolean test) {
   }
 }
 
+// TODO: Avoiding the IncompatibleClassChangeError by running our tests manually
 // Hack to trick junit into thinking we have java tests.
-testClasses {
+//testClasses {
+//  dependsOn testCompileEta
+//  doLast {
+//    copy {
+//      from zipTree("build/etlas/dist/build/test/test.jar")
+//      into "build/classes/test"
+//    }
+//  }
+//}
+//
+//task configureTest {
+//  dependsOn testCompileEta
+//  doLast {
+//    test.classpath += files(getEtaRuntimeClasspath())
+//    test.classpath += files("build/etlas/dist/build/test/test.jar")
+//  }
+//}
+//
+//test {
+//  dependsOn configureTest
+//  jvmArgs += ['-verbose']
+//}
+
+task configureTestPlugin {
   dependsOn testCompileEta
   doLast {
-    copy {
-      from zipTree("build/etlas/dist/build/test/test.jar")
-      into "build/classes/test"
-    }
+    testPlugin.classpath += files(getEtaRuntimeClasspath())
+    testPlugin.classpath += files("build/etlas/dist/build/test/test.jar")
   }
 }
 
-task configureTest {
-  dependsOn compileEta
-  doLast {
-    test.classpath += files(getEtaRuntimeClasspath())
-  }
+task testPlugin(type: JavaExec) {
+  dependsOn configureTestPlugin
+  main 'eta.main'
 }
 
-test {
-  dependsOn configureTest
-}
+test.dependsOn(testPlugin)
