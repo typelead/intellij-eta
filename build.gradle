@@ -1,4 +1,5 @@
 import com.typelead.gradle.utils.EtaRuntimeUtils
+import com.typelead.gradle.utils.EtlasCommand
 
 // Depend on local gradle-eta plugin.
 buildscript {
@@ -46,6 +47,12 @@ repositories {
 }
 
 dependencies {
+}
+
+task buildQuick {
+  doLast {
+    new EtlasCommand(project, eta).build()
+  }
 }
 
 task hpack(type: Exec) {

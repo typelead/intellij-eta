@@ -7,11 +7,13 @@ module P
 import Prelude as X hiding (String, head, tail)
 import Control.Exception as X
 import Control.Monad as X
+import Data.List as X (intercalate)
 import Data.Maybe as X
 import Data.Monoid as X
 import Data.Typeable
-import GHC.Base (unJava)
+import GHC.Base (isTrue#, isNullObject#, unJava)
 import Java as X hiding (getClass, maybeToJava, maybeFromJava, pureJava)
+import Java.String as X (fromJString, toJString)
 import qualified Java
 import qualified Java.Do
 import qualified Java.Exception
@@ -23,13 +25,19 @@ unsafeCoerce = Unsafe.Coerce.unsafeCoerce
 
 type JavaEnum = Java.Utils.Enum
 
+toStringJava :: (a <: Object) => a -> JString
+toStringJava = Java.Utils.toString
+
 foreign import java unsafe
   "@static @field com.typelead.intellij.utils.JavaUtil.unsafeNull"
-  unsafeNull :: (a <: Object) => a
+  unsafeJNull :: (a <: Object) => a
 
 foreign import java unsafe
   "@static @field com.typelead.intellij.utils.JavaUtil.emptyJString"
   emptyJString :: JString
+
+isJNull :: (a <: Object) => a -> Bool
+isJNull x = isTrue# (isNullObject# (unobj x))
 
 getClass :: Class a => JClass a
 getClass = Java.getClass undefined
@@ -46,10 +54,10 @@ data {-# CLASS "java.lang.Class[]" #-} JClassArray a
 instance Class a => JArray (JClass a) (JClassArray a)
 
 maybeToJava :: (a <: Object) => Maybe a -> a
-maybeToJava = fromMaybe unsafeNull
+maybeToJava = fromMaybe unsafeJNull
 
 maybeFromJava :: (a <: Object) => a -> Maybe a
-maybeFromJava x = if x `equals` (unsafeNull :: Object) then Nothing else Just x
+maybeFromJava x = if isJNull x then Nothing else Just x
 
 unsafePerformJava :: (forall c. Java c a) -> a
 unsafePerformJava = Java.pureJava
@@ -67,9 +75,9 @@ instance Monoid JString where
   mempty = emptyJString
   mappend = jStringConcat
 
-foreign import java unsafe "trim" trim :: JString -> JString
-
 foreign import java unsafe "concat" jStringConcat :: JString -> JString -> JString
+
+foreign import java unsafe "trim" trim :: JString -> JString
 
 foreign import java unsafe "@static @field java.io.File.separator" jFileSeparator :: JString
 

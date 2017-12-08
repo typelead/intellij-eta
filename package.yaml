@@ -32,3 +32,4 @@ tests:
     source-dirs: src/test/eta
     dependencies:
     - intellij-eta
+    ghc-options: -ddump-stg -ddump-to-file
