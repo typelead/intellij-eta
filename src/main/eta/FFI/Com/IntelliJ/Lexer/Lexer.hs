@@ -30,6 +30,9 @@ foreign import java "getTokenStart" getTokenStart
 foreign import java "getTokenEnd" getTokenEnd
   :: (a <: Lexer) => Java a Int
 
+foreign import java "getTokenText" getTokenText
+  :: (a <: Lexer) => Java a JString
+
 foreign import java "advance" advance
   :: (a <: Lexer) => Java a ()
 

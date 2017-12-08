@@ -4,12 +4,15 @@ import P
 import Language.Eta.Main.DynFlags
 
 -- | Default flags which can be used to initialize the Eta Lexer.
+-- Adapted from Language.Eta.Parser.Lexer.lexTokenStream
 defaultFlags :: DynFlags
-defaultFlags = partialFlags
-  { generalFlags = mempty
-  , safeHaskell = Sf_None
-  , extensionFlags = mempty
-  }
+defaultFlags = gopt_set (gopt_unset flags Opt_Haddock) Opt_KeepRawTokenStream
+  where
+  flags = partialFlags
+    { generalFlags = mempty
+    , safeHaskell = Sf_None
+    , extensionFlags = mempty
+    }
 
 -- | Hack to not have to construct all DynFlags
 -- This is copy-pasta from eta-parser's test suite

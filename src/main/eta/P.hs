@@ -79,6 +79,10 @@ foreign import java unsafe "concat" jStringConcat :: JString -> JString -> JStri
 
 foreign import java unsafe "trim" trim :: JString -> JString
 
+foreign import java unsafe "replace" jStringReplace
+  :: (a <: CharSequence, b <: CharSequence)
+  => JString -> a -> b -> JString
+
 foreign import java unsafe "@static @field java.io.File.separator" jFileSeparator :: JString
 
 -- Java Functions

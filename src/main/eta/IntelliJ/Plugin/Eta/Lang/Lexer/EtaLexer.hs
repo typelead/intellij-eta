@@ -7,7 +7,7 @@ import P
 import Data.IORef
 import Foreign.StablePtr
 
-import FFI.Com.IntelliJ.Lexer.Lexer (Lexer)
+import FFI.Com.IntelliJ.Lexer.Lexer (Lexer, getTokenText)
 import FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil (lineColToOffset)
 import FFI.Com.IntelliJ.Psi.Tree (IElementType)
 import qualified FFI.Com.IntelliJ.Psi.TokenType as T
@@ -67,7 +67,10 @@ foreign import java unsafe "@field myNextTokenEnd" setMyNextTokenEnd :: Int -> J
 foreign export java "start" start :: CharSequence -> Int -> Int -> Int -> Java EtaLexer ()
 start buf startOffset endOffset initialState = do
   setMyPStatePtr =<< mkPtr
-  setMyState 1 -- For now, let's not use `initialState` so intellij has to start from the beginning
+  -- For now, let's not use `initialState` so intellij has to start from the beginning.
+  -- If intellij sees a state zero then it will assume it can always start the lexer over
+  -- from that position.
+  setMyState 1
   setMyTokenStart startOffset
   setMyTokenEnd startOffset
   setMyBuffer buf
@@ -80,12 +83,11 @@ start buf startOffset endOffset initialState = do
   where
   -- TODO: Do we need to freeStablePtr when we're done and/or before setting this one?
   mkPtr = io $ newIORef pState >>= newStablePtr
-  pState = L.mkPState flags stringBuf srcLoc
-  flags = defaultFlags
+  pState = L.mkPState defaultFlags stringBuf srcLoc
   stringBuf = charSeqToStringBuffer buf
   srcLoc = (mkRealSrcLoc (mkFastString fileName) line col)
   -- Dummy values for constructing the srcLoc
-  fileName = "memory"
+  fileName = "mem"
   line = 0
   col = 0
 
@@ -108,11 +110,13 @@ advance = do
     pStatePtr <- getMyPStatePtr
     pStateRef <- io $ deRefStablePtr pStatePtr
     pState <- io $ readIORef pStateRef
-    case L.unP (L.lexer True return) pState of
+    case L.unP (L.lexer False return) pState of
       L.POk pState' ltok -> do
         io $ writeIORef pStateRef pState'
         case ltok of
-          L _ L.ITeof ->
+          L _ L.ITeof -> do
+            io $ putStrLn "LEXER RECEIVED EOF"
+            debugLexer Nothing
             setMyTokenType unsafeJNull
           L srcSpan token -> do
             -- If myTokenType is null, we're starting fresh.
@@ -126,10 +130,11 @@ advance = do
             -- TODO: This isn't efficient, but the only way we can get the offsets, for now.
             let (startOffset, endOffset) = case srcSpan of
                   RealSrcSpan s ->
-                    ( lineColToOffset myBuffer (srcSpanStartLine s - 1) (srcSpanStartCol s - 1)
-                    , lineColToOffset myBuffer (srcSpanEndLine s - 1)   (srcSpanEndCol s - 1)
+                    ( lineColToOffset myBuffer (srcSpanStartLine s) (srcSpanStartCol s)
+                    , lineColToOffset myBuffer (srcSpanEndLine s) (srcSpanEndCol s)
                     )
-                  -- TODO: Handle this more gracefully
+                  -- TODO: Handle this more gracefully, maybe return a BAD_CHARACTER
+                  -- for the remaining input.
                   _ -> error $ "Unable to obtain location info: " ++ show srcSpan
 
             let iElementType = tokenToIElementType token
@@ -144,19 +149,21 @@ advance = do
               setMyTokenType T.whiteSpace
               setMyTokenEnd (startOffset - 1)
               setMyNextTokenType iElementType
-              setMyNextTokenStart startOffset
-              setMyNextTokenEnd endOffset
+              setMyNextTokenStart (startOffset - 1)
+              setMyNextTokenEnd (endOffset - 1)
               debugLexer (Just (startOffset, endOffset, token, srcSpan))
             else do
-              io $ putStrLn "ERROR CASE"
               debugLexer (Just (startOffset, endOffset, token, srcSpan))
               error $
                 "Unexpected case, startOffset was " ++ show startOffset
                 ++ " and myTokenStart was " ++ show myTokenStart
 
+doDebugLexer = True
+
 debugLexer :: Maybe (Int, Int, L.Token, SrcSpan) -> Java EtaLexer ()
-debugLexer info = do
+debugLexer info = when doDebugLexer $ do
   myState <- getMyState
+  text <- getTokenText
   myTokenStart <- getMyTokenStart
   myTokenEnd <- getMyTokenEnd
   myTokenType <- getMyTokenType
@@ -167,6 +174,7 @@ debugLexer info = do
     [ ("start", show myTokenStart)
     , ("end", show myTokenEnd)
     , ("type", if isJNull myTokenType then "null" else fromJString $ toString myTokenType)
+    , ("text", "'" ++ fromJString (jStringReplace text (toJString "\n") (toJString "\\n")) ++ "'")
     , ("nextType", if isJNull myNextTokenType then "null" else fromJString $ toString myNextTokenType)
     , ("nextStart", show myNextTokenStart)
     , ("nextEnd", show myNextTokenEnd)

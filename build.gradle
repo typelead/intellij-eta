@@ -55,6 +55,22 @@ task buildQuick {
   }
 }
 
+task configureTestQuick {
+  doLast {
+    new EtlasCommand(project, eta).build()
+    // TODO: Unify copy-pasta
+    copy {
+      from zipTree("build/etlas/dist/build/test/test.jar")
+      into "build/classes/test"
+    }
+    testQuick.classpath += files(getEtaRuntimeClasspath())
+  }
+}
+
+task testQuick(type: Test) {
+  dependsOn configureTestQuick
+}
+
 task hpack(type: Exec) {
   commandLine 'hpack'
 }
