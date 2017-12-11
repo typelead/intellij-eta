@@ -98,6 +98,7 @@ start buf startOffset endOffset initialState = do
   col = 0
 
 -- TODO: Should find a faster way to convert CharSequence to StringBuffer
+-- instead of going CharSequence to JString to [Char] to StringBuffer...
 charSeqToStringBuffer :: CharSequence -> StringBuffer
 charSeqToStringBuffer = stringToStringBuffer . fromJString . toStringJava
 
@@ -162,6 +163,10 @@ advance = do
               error $
                 "Unexpected case, startOffset was " ++ show startOffset
                 ++ " and myTokenStart was " ++ show myTokenStart
+
+      -- TODO: Improve error handling/reporting, should attempt to recover somehow.
+      L.PFailed srcSpan msgDoc ->
+        error $ "Unexpected lexer failure at " ++ show srcSpan
 
 doDebugLexer = False
 
