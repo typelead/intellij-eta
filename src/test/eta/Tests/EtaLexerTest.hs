@@ -51,7 +51,7 @@ doTest = do
   loadFile name = doLoadFile srcPath name
 
   doLoadFile myFullDataPath name =
-    convertLineSeparators . trim <$> FileUtil.loadFile (myFullDataPath <> jFileSeparator <> name)
+    convertLineSeparators <$> FileUtil.loadFile (myFullDataPath <> jFileSeparator <> name)
 
   doCheckResult :: forall a. JString -> JString -> JString -> Java a ()
   doCheckResult fullPath targetDataName tokenResult = run $ do
@@ -73,6 +73,5 @@ doTest = do
       overwriteTestData expectedFileName text
       TestCase.fail $ ("No output text found. File " <> expectedFileName <> "created." :: JString)
 
-foreign export java "testArrow00001" testArrow00001 :: Java EtaLexerTest ()
-testArrow00001 :: Java EtaLexerTest ()
+foreign export java testArrow00001 :: Java EtaLexerTest ()
 testArrow00001 = doTest

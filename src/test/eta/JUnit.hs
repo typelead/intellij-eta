@@ -13,7 +13,7 @@ testMain classes = do
   putStrLn $ "Ran " ++ show (getRunCount result) ++ " JUnit tests"
   when (not $ wasSuccessful result) $ do
     mapM_
-      (putStrLn . fromJava . toString)
+      (putStrLn . fromJava . toStringJava)
       (fromJava $ getFailures result :: [Failure])
     putStrLn $ "Failed with " ++ show (getFailureCount result) ++ " failures"
     java $ exit 1

@@ -12,7 +12,11 @@ import Data.Maybe as X
 import Data.Monoid as X
 import Data.Typeable
 import GHC.Base (isTrue#, isNullObject#, unJava)
-import Java as X hiding (getClass, maybeToJava, maybeFromJava, pureJava)
+import Java as X (
+  JArray(..), type (<:), Object, JString, Class(..), JClass(..),
+  Object#, Java(..), CharSequence(..), Inherits(..), withThis, arrayFromList,
+  io, java, (<.>), fromJava, superCast
+  )
 import Java.String as X (fromJString, toJString)
 import qualified Java
 import qualified Java.Do
@@ -24,6 +28,8 @@ unsafeCoerce :: a -> b
 unsafeCoerce = Unsafe.Coerce.unsafeCoerce
 
 type JavaEnum = Java.Utils.Enum
+
+type JList = Java.List
 
 toStringJava :: (a <: Object) => a -> JString
 toStringJava = Java.Utils.toString

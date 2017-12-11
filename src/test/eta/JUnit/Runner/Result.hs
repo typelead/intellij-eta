@@ -10,7 +10,7 @@ foreign import java unsafe "wasSuccessful" wasSuccessful
   :: Result -> Bool
 
 foreign import java unsafe "getFailures" getFailures
-  :: Result -> List Failure
+  :: Result -> JList Failure
 
 foreign import java unsafe "getFailureCount" getFailureCount
   :: Result -> Int

@@ -15,6 +15,7 @@ import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Psi.EtaTokenTypes (tokenToIElem
 
 import qualified Language.Eta.Parser.Lexer as L
 import Language.Eta.BasicTypes.SrcLoc
+import Language.Eta.Main.DynFlags
 import Language.Eta.Utils.FastString (mkFastString)
 import Language.Eta.Utils.StringBuffer
 
@@ -66,6 +67,7 @@ foreign import java unsafe "@field myNextTokenEnd" setMyNextTokenEnd :: Int -> J
 
 foreign export java "start" start :: CharSequence -> Int -> Int -> Int -> Java EtaLexer ()
 start buf startOffset endOffset initialState = do
+  -- debugTokenStream pState
   setMyPStatePtr =<< mkPtr
   -- For now, let's not use `initialState` so intellij has to start from the beginning.
   -- If intellij sees a state zero then it will assume it can always start the lexer over
@@ -83,7 +85,11 @@ start buf startOffset endOffset initialState = do
   where
   -- TODO: Do we need to freeStablePtr when we're done and/or before setting this one?
   mkPtr = io $ newIORef pState >>= newStablePtr
-  pState = L.mkPState defaultFlags stringBuf srcLoc
+  pState = L.mkPState flags stringBuf srcLoc
+  flags = defaultFlags
+  -- TODO: We're appending a newline since the lexer may not be able to lex
+  -- the final ITvccurly and ITsemi if the file doesn't end with one or if
+  -- intellij strips it (which seems to be an issue as well).
   stringBuf = charSeqToStringBuffer buf
   srcLoc = (mkRealSrcLoc (mkFastString fileName) line col)
   -- Dummy values for constructing the srcLoc
@@ -115,7 +121,6 @@ advance = do
         io $ writeIORef pStateRef pState'
         case ltok of
           L _ L.ITeof -> do
-            io $ putStrLn "LEXER RECEIVED EOF"
             debugLexer Nothing
             setMyTokenType unsafeJNull
           L srcSpan token -> do
@@ -158,7 +163,7 @@ advance = do
                 "Unexpected case, startOffset was " ++ show startOffset
                 ++ " and myTokenStart was " ++ show myTokenStart
 
-doDebugLexer = True
+doDebugLexer = False
 
 debugLexer :: Maybe (Int, Int, L.Token, SrcSpan) -> Java EtaLexer ()
 debugLexer info = when doDebugLexer $ do
@@ -173,10 +178,20 @@ debugLexer info = when doDebugLexer $ do
   io $ putStrLn $ intercalate ", " $ map (\(k, v) -> k ++ ":" ++ v) $
     [ ("start", show myTokenStart)
     , ("end", show myTokenEnd)
-    , ("type", if isJNull myTokenType then "null" else fromJString $ toString myTokenType)
+    , ("type", if isJNull myTokenType then "null" else fromJString $ toStringJava myTokenType)
     , ("text", "'" ++ fromJString (jStringReplace text (toJString "\n") (toJString "\\n")) ++ "'")
-    , ("nextType", if isJNull myNextTokenType then "null" else fromJString $ toString myNextTokenType)
+    , ("nextType", if isJNull myNextTokenType then "null" else fromJString $ toStringJava myNextTokenType)
     , ("nextStart", show myNextTokenStart)
     , ("nextEnd", show myNextTokenEnd)
     , ("info", maybe "n/a" show info)
     ]
+
+debugTokenStream :: StringBuffer -> RealSrcLoc -> DynFlags -> Java EtaLexer ()
+debugTokenStream buf loc flags = when doDebugLexer $ io $
+  case L.lexTokenStream buf loc flags of
+    L.POk _ tokens -> do
+      putStrLn "DEBUG TOKEN STREAM: POk"
+      mapM_ (\(L srcSpan token) -> putStrLn $ show srcSpan ++ ": " ++ show token) tokens
+      putStrLn "----------------------------------"
+
+    _ -> putStrLn "DEBUG TOKEN STREAM: FAILED"
