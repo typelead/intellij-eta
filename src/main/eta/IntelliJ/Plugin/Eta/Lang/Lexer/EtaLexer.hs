@@ -67,7 +67,7 @@ foreign import java unsafe "@field myNextTokenStart" setMyNextTokenStart :: Int 
 foreign import java unsafe "@field myNextTokenEnd" getMyNextTokenEnd :: Java EtaLexer Int
 foreign import java unsafe "@field myNextTokenEnd" setMyNextTokenEnd :: Int -> Java EtaLexer ()
 
-foreign export java "start" start :: CharSequence -> Int -> Int -> Int -> Java EtaLexer ()
+foreign export java start :: CharSequence -> Int -> Int -> Int -> Java EtaLexer ()
 start buf startOffset endOffset initialState = do
   -- debugTokenStream pState
   setMyPStatePtr =<< mkPtr
@@ -104,7 +104,7 @@ start buf startOffset endOffset initialState = do
 charSeqToStringBuffer :: CharSequence -> StringBuffer
 charSeqToStringBuffer = stringToStringBuffer . fromJString . toStringJava
 
-foreign export java "advance" advance :: Java EtaLexer ()
+foreign export java advance :: Java EtaLexer ()
 advance = do
   nextTokenTypeOrNull <- getMyNextTokenType
   if not (isJNull nextTokenTypeOrNull) then do

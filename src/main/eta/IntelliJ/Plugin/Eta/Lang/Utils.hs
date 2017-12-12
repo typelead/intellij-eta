@@ -6,12 +6,17 @@ import Language.Eta.Main.DynFlags
 -- | Default flags which can be used to initialize the Eta Lexer.
 -- Adapted from Language.Eta.Parser.Lexer.lexTokenStream
 defaultFlags :: DynFlags
-defaultFlags = gopt_set (gopt_unset flags Opt_Haddock) Opt_KeepRawTokenStream
+defaultFlags =
+    flip gopt_set Opt_KeepRawTokenStream
+  . flip gopt_unset Opt_Haddock
+  $ flags
   where
   flags = partialFlags
     { generalFlags = mempty
     , safeHaskell = Sf_None
+    , extensions = mempty
     , extensionFlags = mempty
+    , language = Nothing
     }
 
 -- | Hack to not have to construct all DynFlags
