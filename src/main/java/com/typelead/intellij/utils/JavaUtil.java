@@ -9,7 +9,7 @@ public abstract class JavaUtil {
 
     public static final String emptyJString = "";
 
-    public static <A> A throwJava(Throwable t) throws Throwable {
+    public static void throwJava(Throwable t) throws Throwable {
         throw t;
     }
 

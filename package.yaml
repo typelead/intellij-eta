@@ -9,11 +9,13 @@ default-extensions:
 - FlexibleInstances
 - FunctionalDependencies
 - GeneralizedNewtypeDeriving
+- LambdaCase
 - MagicHash
 - MultiParamTypeClasses
 - NoImplicitPrelude
 - OverloadedStrings
 - RankNTypes
+- RecordWildCards
 - ScopedTypeVariables
 - TypeFamilies
 - TypeOperators

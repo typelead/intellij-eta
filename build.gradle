@@ -54,13 +54,15 @@ task hpack(type: Exec) {
 
 sandboxAddSourcesEta {
   sources = ['eta-parser']
+  inputs.property('etlas_add_source', sources)
   outputs.files('.cabal-sandbox/add-source-timestamps')
 }
 
 task makeEtaParserSources(type: Exec) {
   workingDir file('eta-parser')
   commandLine = ['make', 'sources']
-  outputs.dir('eta-parser/gen')
+  ['eta', 'java', 'patches', 'tools'].each { inputs.dir("eta-parser/$it") }
+  ['eta-parser.cabal', 'Makefile'].each { inputs.file("eta-parser/$it") }
 }
 
 installDepsEta.dependsOn(hpack, makeEtaParserSources)

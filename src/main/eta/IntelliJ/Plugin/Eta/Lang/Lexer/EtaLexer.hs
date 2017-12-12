@@ -6,6 +6,8 @@ module IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
 import P
 import Data.IORef
 import Foreign.StablePtr
+import System.Environment
+import qualified System.IO.Unsafe as Unsafe
 
 import FFI.Com.IntelliJ.Lexer.Lexer (Lexer, getTokenText)
 import FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil (lineColToOffset)
@@ -112,7 +114,7 @@ advance = do
     setMyNextTokenType unsafeJNull
     setMyNextTokenStart (-1)
     setMyNextTokenEnd (-1)
-    debugLexer Nothing
+    debugLexer ()
   else do
     pStatePtr <- getMyPStatePtr
     pStateRef <- io $ deRefStablePtr pStatePtr
@@ -122,7 +124,7 @@ advance = do
         io $ writeIORef pStateRef pState'
         case ltok of
           L _ L.ITeof -> do
-            debugLexer Nothing
+            debugLexer ()
             setMyTokenType unsafeJNull
           L srcSpan token -> do
             -- If myTokenType is null, we're starting fresh.
@@ -134,14 +136,19 @@ advance = do
 
             myBuffer <- getMyBuffer
             -- TODO: This isn't efficient, but the only way we can get the offsets, for now.
-            let (startOffset, endOffset) = case srcSpan of
-                  RealSrcSpan s ->
-                    ( lineColToOffset myBuffer (srcSpanStartLine s) (srcSpanStartCol s)
-                    , lineColToOffset myBuffer (srcSpanEndLine s) (srcSpanEndCol s)
-                    )
-                  -- TODO: Handle this more gracefully, maybe return a BAD_CHARACTER
-                  -- for the remaining input.
-                  _ -> error $ "Unable to obtain location info: " ++ show srcSpan
+            -- Also, for some reason column offsets are 0-based on line 0 but 1-based afterwards.
+            let computeOffset line col =
+                  if line == 0 then lineColToOffset myBuffer line col
+                  else lineColToOffset myBuffer line (col - 1)
+                (startOffset, endOffset) =
+                  case srcSpan of
+                    RealSrcSpan s ->
+                      ( computeOffset (srcSpanStartLine s) (srcSpanStartCol s)
+                      , computeOffset (srcSpanEndLine s) (srcSpanEndCol s)
+                      )
+                    -- TODO: Handle this more gracefully, maybe return a BAD_CHARACTER
+                    -- for the remaining input.
+                    _ -> error $ "Unable to obtain location info: " ++ show srcSpan
 
             let iElementType = tokenToIElementType token
 
@@ -149,17 +156,17 @@ advance = do
             if startOffset == myTokenStart then do
               setMyTokenType iElementType
               setMyTokenEnd endOffset
-              debugLexer (Just (startOffset, endOffset, token, srcSpan))
+              debugLexer (startOffset, endOffset, token, srcSpan)
             -- Found a gap, inject a whitespace token, prepare the next token.
             else if startOffset > myTokenStart then do
               setMyTokenType T.whiteSpace
-              setMyTokenEnd (startOffset - 1)
+              setMyTokenEnd startOffset
               setMyNextTokenType iElementType
-              setMyNextTokenStart (startOffset - 1)
-              setMyNextTokenEnd (endOffset - 1)
-              debugLexer (Just (startOffset, endOffset, token, srcSpan))
+              setMyNextTokenStart startOffset
+              setMyNextTokenEnd endOffset
+              debugLexer (startOffset, endOffset, token, srcSpan)
             else do
-              debugLexer (Just (startOffset, endOffset, token, srcSpan))
+              debugLexer (startOffset, endOffset, token, srcSpan)
               error $
                 "Unexpected case, startOffset was " ++ show startOffset
                 ++ " and myTokenStart was " ++ show myTokenStart
@@ -168,9 +175,12 @@ advance = do
       L.PFailed srcSpan msgDoc ->
         error $ "Unexpected lexer failure at " ++ show srcSpan
 
-doDebugLexer = False
+-- | If the DEBUG_LEXER env var is set, log lexer debug info to stdout.
+{-# NOINLINE doDebugLexer #-}
+doDebugLexer :: Bool
+doDebugLexer = Unsafe.unsafePerformIO $ isJust <$> lookupEnv "DEBUG_LEXER"
 
-debugLexer :: Maybe (Int, Int, L.Token, SrcSpan) -> Java EtaLexer ()
+debugLexer :: Show a => a -> Java EtaLexer ()
 debugLexer info = when doDebugLexer $ do
   myState <- getMyState
   text <- getTokenText
@@ -188,7 +198,7 @@ debugLexer info = when doDebugLexer $ do
     , ("nextType", if isJNull myNextTokenType then "null" else fromJString $ toStringJava myNextTokenType)
     , ("nextStart", show myNextTokenStart)
     , ("nextEnd", show myNextTokenEnd)
-    , ("info", maybe "n/a" show info)
+    , ("info", show info)
     ]
 
 debugTokenStream :: StringBuffer -> RealSrcLoc -> DynFlags -> Java EtaLexer ()
