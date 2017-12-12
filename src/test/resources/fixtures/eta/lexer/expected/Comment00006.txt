@@ -1,5 +1,5 @@
-ITblockComment ('{-\nmain = 1; {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}\nmain = 1; {-# ANN module (1 + (2)) #-}\n-}\n')
-WHITE_SPACE ('')
+ITblockComment ('{-\nmain = 1; {-# ANN module ("HLint: ignore Use camelCase" :: String) #-}\nmain = 1; {-# ANN module (1 + (2)) #-}\n-}')
+WHITE_SPACE ('\n')
 ITmodule ('module')
 WHITE_SPACE (' ')
 ITconid ('Comment00006')
