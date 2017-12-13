@@ -4,6 +4,8 @@ import com.intellij.psi.tree.IElementType;
 
 public interface EtaTokenTypes {
 
+  // TODO: We should be able to build this in Eta instead by foreign importing the
+  // @new for EtaTokenType
   IElementType ITas = new EtaTokenType("ITas"); // Haskell keywords
   IElementType ITcase = new EtaTokenType("ITcase");
   IElementType ITclass = new EtaTokenType("ITclass");

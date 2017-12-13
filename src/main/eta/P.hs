@@ -14,8 +14,8 @@ import Data.Typeable
 import GHC.Base (isTrue#, isNullObject#, unJava)
 import Java as X (
   JArray(..), type (<:), Object, JString, Class(..), JClass(..),
-  Object#, Java(..), CharSequence(..), Inherits(..), withThis, arrayFromList,
-  io, java, (<.>), fromJava, superCast
+  Object#, Java(..), CharSequence(..), Inherits(..), Short(..),
+  withThis, arrayFromList, io, java, (<.>), fromJava, superCast
   )
 import Java.String as X (fromJString, toJString)
 import qualified Java
@@ -26,6 +26,10 @@ import qualified Unsafe.Coerce
 
 unsafeCoerce :: a -> b
 unsafeCoerce = Unsafe.Coerce.unsafeCoerce
+
+superCastJ :: (a <: b) => Java x a -> Java x b
+superCastJ = (superCast <$>)
+--superCastJ = unsafeCoerce
 
 type JavaEnum = Java.Utils.Enum
 

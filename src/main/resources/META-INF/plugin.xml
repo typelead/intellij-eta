@@ -7,9 +7,13 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <fileTypeFactory implementation="com.typelead.intellij.plugin.eta.lang.psi.EtaFileTypeFactory"/>
-    <!--<lang.parserDefinition-->
-      <!--language="Eta"-->
-      <!--implementationClass="com.typelead"-->
-    <!--/>-->
+    <lang.syntaxHighlighterFactory
+      language="Eta"
+      implementationClass="com.typelead.intellij.plugin.eta.lang.highlighting.EtaSyntaxHighlighterFactory"
+    />
+    <lang.parserDefinition
+      language="Eta"
+      implementationClass="com.typelead.intellij.plugin.eta.lang.parser.EtaParserDefinition"
+    />
   </extensions>
 </idea-plugin>

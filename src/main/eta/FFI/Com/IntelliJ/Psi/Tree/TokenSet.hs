@@ -7,10 +7,10 @@ data {-# CLASS "com.intellij.psi.tree.TokenSet" #-}
   TokenSet = TokenSet (Object# TokenSet)
   deriving Class
 
-foreign import java unsafe "@static com.intellij.psi.tree.TokenSet.EMPTY"
+foreign import java unsafe "@static @field com.intellij.psi.tree.TokenSet.EMPTY"
   empty :: TokenSet
 
-foreign import java unsafe "@static com.intellij.psi.tree.TokenSet.ANY"
+foreign import java unsafe "@static @field com.intellij.psi.tree.TokenSet.ANY"
   any :: TokenSet
 
 foreign import java unsafe "@static com.intellij.psi.tree.TokenSet.create"

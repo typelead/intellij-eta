@@ -10,5 +10,5 @@ data {-# CLASS "com.typelead.intellij.plugin.eta.lang.EtaLanguage" #-}
 type instance Inherits EtaLanguage = '[Object, Language]
 
 foreign import java unsafe
-  "@static com.typelead.intellij.plugin.eta.lang.EtaLanguage.INSTANCE"
+  "@static @field com.typelead.intellij.plugin.eta.lang.EtaLanguage.INSTANCE"
   etaLanguage :: EtaLanguage

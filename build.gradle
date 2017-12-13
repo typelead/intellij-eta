@@ -84,7 +84,7 @@ testCompileEta {
 
 prepareSandbox {
   doLast {
-    copyEtaRuntimeToPluginSandbox(true)
+    copyEtaRuntimeToPluginSandbox(false)
   }
 }
 
