@@ -14,6 +14,7 @@ public abstract class AbstractEtaLexer extends LexerBase {
   /** Backed by a StablePtr (IORef PState) */
   public int myPStatePtr;
 
+  public boolean done;
   public int myState;
   public int myTokenStart;
   public int myTokenEnd;

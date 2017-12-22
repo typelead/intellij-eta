@@ -1,12 +1,12 @@
 module Tests.EtaLexerTest where
 
 import P
-import FFI.Com.IntelliJ.Lexer.Lexer (Lexer)
+import FFI.Com.IntelliJ.Lexer.Lexer
 import FFI.Com.IntelliJ.RT.Execution.JUnit.FileComparisonFailure
 import qualified FFI.Com.IntelliJ.OpenApi.Util.IO.FileUtil as FileUtil
 import FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil
-import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
-import qualified JUnit.Framework.TestCase as TestCase
+import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer (newEtaLexer)
+import qualified JUnit.Framework.TestCase as T
 import IntelliJ.TestFramework.LexerTestCase
 import IntelliJ.TestFramework.UsefulTestCase
 import IntelliJ.TestFramework.VfsTestUtil
@@ -33,6 +33,7 @@ dirPath :: JString
 dirPath = "src/test/resources/fixtures/eta"
 
 foreign export java "createLexer" createLexer :: Java EtaLexerTest Lexer
+createLexer :: Java EtaLexerTest Lexer
 createLexer = superCast <$> newEtaLexer
 
 doTest :: Java EtaLexerTest ()
@@ -41,6 +42,7 @@ doTest = do
   testName <- this <.> getTestNameUpper
   let fileName = testName <> ".hs"
   text <- loadFile fileName
+  checkSegments text
   result <- this <.> printTokens text 0
   doCheckResult (myExpectPath <> jFileSeparator <> "expected") (testName <> ".txt") result
   where
@@ -71,7 +73,31 @@ doTest = do
     run :: forall b. (forall a. Java a ()) -> Java b ()
     run f = io $ catch (java f) $ \(e :: FileNotFoundException) -> java $ do
       overwriteTestData expectedFileName text
-      TestCase.fail $ ("No output text found. File " <> expectedFileName <> "created." :: JString)
+      T.fail $ ("No output text found. File " <> expectedFileName <> "created." :: JString)
+
+checkSegments :: JString -> Java EtaLexerTest ()
+checkSegments text = do
+  let len = jStringLength text
+  lexer <- createLexer
+  lexer <.> start (superCast text) 0 len 0
+  (lexer <.> getTokenType) >>= (if len == 0 then assertNothing else assertJust)
+  loop lexer 0
+  where
+  loop lexer lastEnd = do
+    (lexer <.> getTokenStart) >>= assertEq lastEnd
+    lastEnd' <- lexer <.> getTokenEnd
+    lexer <.> advance
+    typ <- lexer <.> getTokenType
+    when (isJust typ) $ loop lexer lastEnd'
+
+assertEq :: (Show a, Eq a) => a -> a -> Java b ()
+assertEq x y = when (x /= y) $ T.fail $ toJString $ show x ++ " /= " ++ show y
+
+assertNothing :: Show a => Maybe a -> Java b ()
+assertNothing mx = when (isJust mx) $ T.fail $ toJString $ "Expected Nothing, got " ++ show mx
+
+assertJust :: Maybe a -> Java b ()
+assertJust mx = when (isNothing mx) $ T.fail "Expected Just, got Nothing"
 
 foreign export java testArrow00001 :: Java EtaLexerTest ()
 testArrow00001 = doTest
@@ -191,6 +217,9 @@ testImport00005 = doTest
 
 foreign export java testImport00006 :: Java EtaLexerTest ()
 testImport00006 = doTest
+
+foreign export java testIncomplete00001 :: Java EtaLexerTest ()
+testIncomplete00001 = doTest
 
 foreign export java testInfix00001 :: Java EtaLexerTest ()
 testInfix00001 = doTest

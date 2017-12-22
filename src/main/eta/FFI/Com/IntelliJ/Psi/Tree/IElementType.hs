@@ -19,3 +19,6 @@ data {-# CLASS "com.intellij.psi.tree.IElementType[]" #-}
   deriving Class
 
 instance JArray IElementType IElementTypeArray
+
+instance Show IElementType where
+  show = fromJString . toStringJava

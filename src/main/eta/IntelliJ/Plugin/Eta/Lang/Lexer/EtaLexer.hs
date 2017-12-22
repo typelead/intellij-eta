@@ -40,6 +40,9 @@ foreign import java unsafe "@new" newEtaLexer :: Java a EtaLexer
 foreign import java unsafe "@field myPStatePtr" getMyPStatePtr :: Java EtaLexer (StablePtr (IORef L.PState))
 foreign import java unsafe "@field myPStatePtr" setMyPStatePtr :: StablePtr (IORef L.PState) -> Java EtaLexer ()
 
+foreign import java unsafe "@field done" getDone :: Java EtaLexer Bool
+foreign import java unsafe "@field done" setDone :: Bool -> Java EtaLexer ()
+
 foreign import java unsafe "@field myState" getMyState :: Java EtaLexer Int
 foreign import java unsafe "@field myState" setMyState :: Int -> Java EtaLexer ()
 
@@ -75,6 +78,7 @@ start buf startOffset endOffset initialState = do
   -- If intellij sees a state zero then it will assume it can always start the lexer over
   -- from that position.
   setMyState 1
+  setDone False
   setMyTokenStart startOffset
   setMyTokenEnd startOffset
   setMyBuffer buf
@@ -106,74 +110,83 @@ charSeqToStringBuffer = stringToStringBuffer . fromJString . toStringJava
 
 foreign export java advance :: Java EtaLexer ()
 advance = do
-  nextTokenTypeOrNull <- getMyNextTokenType
-  if not (isJNull nextTokenTypeOrNull) then do
-    setMyTokenType nextTokenTypeOrNull
-    setMyTokenStart =<< getMyNextTokenStart
-    setMyTokenEnd =<< getMyNextTokenEnd
-    setMyNextTokenType unsafeJNull
-    setMyNextTokenStart (-1)
-    setMyNextTokenEnd (-1)
-    debugLexer ()
+  done <- getDone
+  if done then
+    setMyTokenType unsafeJNull
   else do
-    pStatePtr <- getMyPStatePtr
-    pStateRef <- io $ deRefStablePtr pStatePtr
-    pState <- io $ readIORef pStateRef
-    case L.unP (L.lexer False return) pState of
-      L.POk pState' ltok -> do
-        io $ writeIORef pStateRef pState'
-        case ltok of
-          L _ L.ITeof -> do
-            debugLexer ()
-            setMyTokenType unsafeJNull
-          L srcSpan token -> do
-            -- If myTokenType is null, we're starting fresh.
-            oldTokenType <- getMyTokenType
-            if isJNull oldTokenType then
-              setMyTokenStart 0
-            else
-              getMyTokenEnd >>= setMyTokenStart
+    nextTokenTypeOrNull <- getMyNextTokenType
+    if not (isJNull nextTokenTypeOrNull) then do
+      setMyTokenType nextTokenTypeOrNull
+      setMyTokenStart =<< getMyNextTokenStart
+      setMyTokenEnd =<< getMyNextTokenEnd
+      setMyNextTokenType unsafeJNull
+      setMyNextTokenStart (-1)
+      setMyNextTokenEnd (-1)
+      debugLexer ()
+    else do
+      pStatePtr <- getMyPStatePtr
+      pStateRef <- io $ deRefStablePtr pStatePtr
+      pState <- io $ readIORef pStateRef
+      case L.unP (L.lexer False return) pState of
+        L.POk pState' ltok -> do
+          io $ writeIORef pStateRef pState'
+          case ltok of
+            L _ L.ITeof -> do
+              debugLexer ()
+              setDone True
+              setMyTokenType unsafeJNull
+            L srcSpan token -> do
+              -- If myTokenType is null, we're starting fresh.
+              oldTokenType <- getMyTokenType
+              myTokenStart <- if isJNull oldTokenType then return 0 else getMyTokenEnd
+              setMyTokenStart myTokenStart
+              myBuffer <- getMyBuffer
+              myBufferEnd <- getMyBufferEnd
 
-            myBuffer <- getMyBuffer
-            -- TODO: This isn't efficient, but the only way we can get the offsets, for now.
-            -- Also, for some reason column offsets are 0-based on line 0 but 1-based afterwards.
-            let computeOffset line col =
-                  if line == 0 then lineColToOffset myBuffer line col
-                  else lineColToOffset myBuffer line (col - 1)
-                (startOffset, endOffset) =
-                  case srcSpan of
-                    RealSrcSpan s ->
-                      ( computeOffset (srcSpanStartLine s) (srcSpanStartCol s)
-                      , computeOffset (srcSpanEndLine s) (srcSpanEndCol s)
-                      )
-                    -- TODO: Handle this more gracefully, maybe return a BAD_CHARACTER
-                    -- for the remaining input.
-                    _ -> error $ "Unable to obtain location info: " ++ show srcSpan
+              -- TODO: This isn't efficient, but the only way we can get the offsets, for now.
+              -- Also, for some reason column offsets are 0-based on line 0 but 1-based afterwards.
+              let computeOffset line col =
+                    if line == 0 then lineColToOffset myBuffer line col
+                    else lineColToOffset myBuffer line (col - 1)
 
-            let iElementType = tokenToIElementType token
+                  (startOffset, endOffset, iElementType) =
+                    case srcSpan of
+                      RealSrcSpan s ->
+                        ( computeOffset (srcSpanStartLine s) (srcSpanStartCol s)
+                        , computeOffset (srcSpanEndLine s) (srcSpanEndCol s)
+                        , tokenToIElementType token
+                        )
 
-            myTokenStart <- getMyTokenStart
-            if startOffset == myTokenStart then do
-              setMyTokenType iElementType
-              setMyTokenEnd endOffset
-              debugLexer (startOffset, endOffset, token, srcSpan)
-            -- Found a gap, inject a whitespace token, prepare the next token.
-            else if startOffset > myTokenStart then do
-              setMyTokenType T.whiteSpace
-              setMyTokenEnd startOffset
-              setMyNextTokenType iElementType
-              setMyNextTokenStart startOffset
-              setMyNextTokenEnd endOffset
-              debugLexer (startOffset, endOffset, token, srcSpan)
-            else do
-              debugLexer (startOffset, endOffset, token, srcSpan)
-              error $
-                "Unexpected case, startOffset was " ++ show startOffset
-                ++ " and myTokenStart was " ++ show myTokenStart
+                      -- TODO: Should probably log that we weren't able to retrieve position info.
+                      _ -> (myTokenStart, myBufferEnd, T.badCharacter)
 
-      -- TODO: Improve error handling/reporting, should attempt to recover somehow.
-      L.PFailed srcSpan msgDoc ->
-        error $ "Unexpected lexer failure at " ++ show srcSpan
+              if startOffset == myTokenStart then do
+                setMyTokenType iElementType
+                setMyTokenEnd endOffset
+                debugLexer (startOffset, endOffset, token, srcSpan)
+              -- Found a gap, inject a whitespace token, prepare the next token.
+              else if startOffset > myTokenStart then do
+                setMyTokenType T.whiteSpace
+                setMyTokenEnd startOffset
+                setMyNextTokenType iElementType
+                setMyNextTokenStart startOffset
+                setMyNextTokenEnd endOffset
+                debugLexer (startOffset, endOffset, token, srcSpan)
+              else do
+                debugLexer (startOffset, endOffset, token, srcSpan)
+                error $
+                  "Unexpected case, startOffset was " ++ show startOffset
+                  ++ " and myTokenStart was " ++ show myTokenStart
+
+        L.PFailed srcSpan msgDoc -> do
+          startOffset <- getMyTokenEnd
+          endOffset <- getMyBufferEnd
+          let iElementType = T.badCharacter
+          setMyTokenType iElementType
+          setMyTokenStart startOffset
+          setMyTokenEnd endOffset
+          debugLexer (startOffset, endOffset, iElementType)
+          setDone True
 
 -- | If the DEBUG_LEXER env var is set, log lexer debug info to stdout.
 {-# NOINLINE doDebugLexer #-}
@@ -193,9 +206,9 @@ debugLexer info = when doDebugLexer $ do
   io $ putStrLn $ intercalate ", " $ map (\(k, v) -> k ++ ":" ++ v) $
     [ ("start", show myTokenStart)
     , ("end", show myTokenEnd)
-    , ("type", if isJNull myTokenType then "null" else fromJString $ toStringJava myTokenType)
+    , ("type", if isJNull myTokenType then "null" else show myTokenType)
     , ("text", "'" ++ fromJString (jStringReplace text (toJString "\n") (toJString "\\n")) ++ "'")
-    , ("nextType", if isJNull myNextTokenType then "null" else fromJString $ toStringJava myNextTokenType)
+    , ("nextType", if isJNull myNextTokenType then "null" else show myNextTokenType)
     , ("nextStart", show myNextTokenStart)
     , ("nextEnd", show myNextTokenEnd)
     , ("info", show info)

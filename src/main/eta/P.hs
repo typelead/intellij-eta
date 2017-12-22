@@ -93,6 +93,13 @@ foreign import java unsafe "replace" jStringReplace
   :: (a <: CharSequence, b <: CharSequence)
   => JString -> a -> b -> JString
 
+foreign import java unsafe "length" jStringLength :: JString -> Int
+
+foreign import java unsafe "@interface length" charSeqLength :: CharSequence -> Int
+
+foreign import java unsafe "@interface subSequence"
+  charSeqSubSequence :: CharSequence -> Int -> Int -> CharSequence
+
 foreign import java unsafe "@static @field java.io.File.separator" jFileSeparator :: JString
 
 -- Java Functions
