@@ -11,6 +11,14 @@ You will also need the command line tool [hpack](https://github.com/sol/hpack)
 % ./gradlew assemble
 ```
 
+## Running
+
+You can run a sandboxed version of the plugin with -
+
+```
+% ./gradlew runIde
+```
+
 ## Testing
 
 ```
