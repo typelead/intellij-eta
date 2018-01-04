@@ -7,6 +7,7 @@ module P
 import Prelude as X hiding (String, head, tail)
 import Control.Exception as X
 import Control.Monad as X
+import qualified Data.Int
 import Data.List as X (intercalate)
 import Data.Maybe as X
 import Data.Monoid as X
@@ -23,6 +24,8 @@ import qualified Java.Do
 import qualified Java.Exception
 import qualified Java.Utils
 import qualified Unsafe.Coerce
+
+type Long = Data.Int.Int64
 
 unsafeCoerce :: a -> b
 unsafeCoerce = Unsafe.Coerce.unsafeCoerce
