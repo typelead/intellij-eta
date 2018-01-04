@@ -14,9 +14,19 @@ data {-# CLASS "com.intellij.openapi.fileTypes.FileType" #-}
   FileType = FileType (Object# FileType)
   deriving Class
 
+-----------------
+-- EtaFileType --
+-----------------
+
+data {-# CLASS "com.typelead.intellij.plugin.eta.lang.EtaFileType" #-}
+  EtaFileType = EtaFileType (Object# EtaFileType)
+  deriving Class
+
+type instance Inherits EtaFileType = '[FileType]
+
 foreign import java unsafe
   "@static @field com.typelead.intellij.plugin.eta.lang.EtaFileType.INSTANCE"
-  etaFileType :: FileType
+  etaFileType :: EtaFileType
 
 ----------------------------
 -- CodeInsightTestFixture --
@@ -26,7 +36,7 @@ data {-# CLASS "com.intellij.testFramework.fixtures.CodeInsightTestFixture" #-}
   CodeInsightTestFixture = CodeInsightTestFixture (Object# CodeInsightTestFixture)
   deriving Class
 
-foreign import java unsafe configureByText
+foreign import java unsafe "@interface" configureByText
   :: FileType -> JString -> Java CodeInsightTestFixture PsiFile
 
 foreign import java unsafe testHighlighting
@@ -36,17 +46,14 @@ foreign import java unsafe testHighlighting
 -- LightPlatformCodeInsightFixtureTestCase --
 ---------------------------------------------
 
-data {-# CLASS "com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase" #-}
-  LightPlatformCodeInsightFixtureTestCase = LightPlatformCodeInsightFixtureTestCase (Object# LightPlatformCodeInsightFixtureTestCase)
+data {-# CLASS "com.typelead.intellij.test.LightPlatformCodeInsightFixtureTestCaseWrapper" #-}
+  LightPlatformCodeInsightFixtureTestCaseWrapper = LightPlatformCodeInsightFixtureTestCaseWrapper (Object# LightPlatformCodeInsightFixtureTestCaseWrapper)
   deriving Class
 
-type instance Inherits LightPlatformCodeInsightFixtureTestCase = '[UsefulTestCase]
+type instance Inherits LightPlatformCodeInsightFixtureTestCaseWrapper = '[UsefulTestCase]
 
-foreign import java unsafe "@field myFixture" getMyFixture
-  :: Java LightPlatformCodeInsightFixtureTestCase CodeInsightTestFixture
-
--- foreign import java unsafe configureByText
---   :: FileType -> JString -> Java CodeInsightTestCase PsiFile
+foreign import java unsafe getMyFixture
+  :: Java LightPlatformCodeInsightFixtureTestCaseWrapper CodeInsightTestFixture
 
 ------------------------------
 -- EtaSyntaxHighlighterTest --
@@ -56,7 +63,7 @@ data {-# CLASS "com.typelead.EtaSyntaxHighlighterTest" #-}
   EtaSyntaxHighlighterTest = EtaSyntaxHighlighterTest (Object# EtaSyntaxHighlighterTest)
   deriving Class
 
-type instance Inherits EtaSyntaxHighlighterTest = '[LightPlatformCodeInsightFixtureTestCase]
+type instance Inherits EtaSyntaxHighlighterTest = '[LightPlatformCodeInsightFixtureTestCaseWrapper]
 
 foreign export java testSimple
            :: Java EtaSyntaxHighlighterTest ()
@@ -71,4 +78,4 @@ testSimple = do
   myFixture <.> testHighlighting
   return ()
   where
-  configureLines xs = configureByText etaFileType (foldMap (<> "\n") xs)
+  configureLines xs = configureByText (superCast etaFileType) (foldMap (<> "\n") xs)
