@@ -14,7 +14,7 @@ import Data.Monoid as X
 import Data.Typeable
 import GHC.Base (isTrue#, isNullObject#, unJava)
 import Java as X (
-  JArray(..), type (<:), Object, JString, Class(..), JClass(..),
+  JArray(..), type (<:), Object, JString, JStringArray, Class(..), JClass(..),
   Object#, Java(..), CharSequence(..), Inherits(..), Short(..),
   withThis, arrayFromList, io, java, (<.>), fromJava, superCast
   )

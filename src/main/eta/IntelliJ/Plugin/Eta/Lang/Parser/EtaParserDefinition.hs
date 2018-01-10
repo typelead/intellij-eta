@@ -15,7 +15,7 @@ import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.EtaLanguage
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Psi.EtaFile
 import FFI.Com.TypeLead.IntelliJ.Utils.Parser.SimplePsiParser
 
-import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer (EtaLexer, newEtaLexer)
+import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
 import IntelliJ.Plugin.Eta.Lang.Psi.EtaElementFactory
 
 data {-# CLASS "com.typelead.intellij.plugin.eta.lang.parser.EtaParserDefinition implements com.intellij.lang.ParserDefinition" #-}
@@ -24,7 +24,7 @@ data {-# CLASS "com.typelead.intellij.plugin.eta.lang.parser.EtaParserDefinition
 
 foreign export java "createLexer" createLexer
   :: Project -> Java EtaParserDefinition Lexer
-createLexer _ = superCastJ newEtaLexer
+createLexer _ = superCastJ newEtaSyntaxHighlightingLexer
 
 foreign export java "createParser" createParser
   :: Project -> Java EtaParserDefinition PsiParser

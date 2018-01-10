@@ -1,6 +1,7 @@
 module IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
  ( EtaLexer(..)
- , newEtaLexer
+ , newEtaParsingLexer
+ , newEtaSyntaxHighlightingLexer
  ) where
 
 import P
@@ -23,25 +24,37 @@ import Language.Eta.Utils.StringBuffer
 
 import IntelliJ.Plugin.Eta.Lang.Utils
 
-data {-# CLASS "com.typelead.intellij.plugin.eta.lang.lexer.AbstractEtaLexer" #-}
-  AbstractEtaLexer = AbstractEtaLexer (Object# AbstractEtaLexer)
+data AbstractEtaLexer = AbstractEtaLexer
+  @com.typelead.intellij.plugin.eta.lang.lexer.AbstractEtaLexer
   deriving Class
 
 type instance Inherits AbstractEtaLexer = '[Object, Lexer]
 
-data {-# CLASS "com.typelead.intellij.plugin.eta.lang.lexer.EtaLexer" #-}
-  EtaLexer = EtaLexer (Object# EtaLexer)
+data EtaLexer = EtaLexer
+  @com.typelead.intellij.plugin.eta.lang.lexer.EtaLexer
   deriving Class
 
 type instance Inherits EtaLexer = '[AbstractEtaLexer]
 
-foreign import java unsafe "@new" newEtaLexer :: Java a EtaLexer
+newEtaParsingLexer :: Java a EtaLexer
+newEtaParsingLexer = unsafeNewEtaLexer
+
+newEtaSyntaxHighlightingLexer :: Java a EtaLexer
+newEtaSyntaxHighlightingLexer = do
+  lexer <- unsafeNewEtaLexer
+  lexer <.> setSkipVirtual True
+  return lexer
+
+foreign import java unsafe "@new" unsafeNewEtaLexer :: Java a EtaLexer
 
 foreign import java unsafe "@field myPStatePtr" getMyPStatePtr :: Java EtaLexer (StablePtr (IORef L.PState))
 foreign import java unsafe "@field myPStatePtr" setMyPStatePtr :: StablePtr (IORef L.PState) -> Java EtaLexer ()
 
 foreign import java unsafe "@field done" getDone :: Java EtaLexer Bool
 foreign import java unsafe "@field done" setDone :: Bool -> Java EtaLexer ()
+
+foreign import java unsafe "@field skipVirtual" getSkipVirtual :: Java EtaLexer Bool
+foreign import java unsafe "@field skipVirtual" setSkipVirtual :: Bool -> Java EtaLexer ()
 
 foreign import java unsafe "@field myState" getMyState :: Java EtaLexer Int
 foreign import java unsafe "@field myState" setMyState :: Int -> Java EtaLexer ()
@@ -134,7 +147,18 @@ advance = do
             L _ L.ITeof -> do
               debugLexer ()
               setDone True
-              setMyTokenType unsafeJNull
+              myTokenEnd <- getMyTokenEnd
+              myBufferEnd <- getMyBufferEnd
+              -- In the case that we have remaining characters after our last emitted
+              -- token, we may have just omitted virtual tokens. It's simple enough to
+              -- just emit T.badCharacter for the remaining input, which is likely to be
+              -- whitespace.
+              if myTokenEnd < myBufferEnd then do
+                setMyTokenType T.whiteSpace
+                setMyTokenStart myTokenEnd
+                setMyTokenEnd myBufferEnd
+              else
+                setMyTokenType unsafeJNull
             L srcSpan token -> do
               -- If myTokenType is null, we're starting fresh.
               oldTokenType <- getMyTokenType
@@ -159,8 +183,12 @@ advance = do
 
                       -- TODO: Should probably log that we weren't able to retrieve position info.
                       _ -> (myTokenStart, myBufferEnd, T.badCharacter)
-
-              if startOffset == myTokenStart then do
+              skipVirtual <- getSkipVirtual
+              -- Virtual tokens have the same start/end offset, so skip them if
+              -- skipVirtual == true; this is needed for the syntax highlighter.
+              if skipVirtual && startOffset == endOffset then
+                advance
+              else if startOffset == myTokenStart then do
                 setMyTokenType iElementType
                 setMyTokenEnd endOffset
                 debugLexer (startOffset, endOffset, token, srcSpan)
@@ -174,6 +202,7 @@ advance = do
                 debugLexer (startOffset, endOffset, token, srcSpan)
               else do
                 debugLexer (startOffset, endOffset, token, srcSpan)
+                -- TODO: Log error, yield T.badCharacter for the rest of the stream.
                 error $
                   "Unexpected case, startOffset was " ++ show startOffset
                   ++ " and myTokenStart was " ++ show myTokenStart

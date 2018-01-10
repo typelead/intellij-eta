@@ -5,7 +5,7 @@ import FFI.Com.IntelliJ.Lexer.Lexer
 import FFI.Com.IntelliJ.RT.Execution.JUnit.FileComparisonFailure
 import qualified FFI.Com.IntelliJ.OpenApi.Util.IO.FileUtil as FileUtil
 import FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil
-import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer (newEtaLexer)
+import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
 import qualified JUnit.Framework.TestCase as T
 import IntelliJ.TestFramework.LexerTestCase
 import IntelliJ.TestFramework.UsefulTestCase
@@ -34,7 +34,7 @@ dirPath = "src/test/resources/fixtures/eta"
 
 foreign export java "createLexer" createLexer :: Java EtaLexerTest Lexer
 createLexer :: Java EtaLexerTest Lexer
-createLexer = superCast <$> newEtaLexer
+createLexer = superCast <$> newEtaParsingLexer
 
 doTest :: Java EtaLexerTest ()
 doTest = do
@@ -57,7 +57,7 @@ doTest = do
 
   doCheckResult :: forall a. JString -> JString -> JString -> Java a ()
   doCheckResult fullPath targetDataName tokenResult = run $ do
-    expectedText <- doLoadFile fullPath targetDataName
+    expectedText <- trim <$> doLoadFile fullPath targetDataName
     when (expectedText /= text) $ throwFileComparisonFailure expectedText
     where
     text = trim tokenResult

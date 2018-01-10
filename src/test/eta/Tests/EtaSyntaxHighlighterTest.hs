@@ -18,7 +18,7 @@ data FileType = FileType
 -- EtaFileType --
 -----------------
 
-data EtaFileType = EtaFileType (Object# EtaFileType)
+data EtaFileType = EtaFileType
   @com.typelead.intellij.plugin.eta.lang.EtaFileType
   deriving Class
 
@@ -39,8 +39,11 @@ data CodeInsightTestFixture = CodeInsightTestFixture
 foreign import java unsafe "@interface" configureByText
   :: FileType -> JString -> Java CodeInsightTestFixture PsiFile
 
-foreign import java unsafe testHighlighting
-  :: Java CodeInsightTestFixture Long
+foreign import java unsafe "@interface" testHighlighting
+  :: JStringArray -> Java CodeInsightTestFixture Long
+
+testHighlighting' :: Java CodeInsightTestFixture Long
+testHighlighting' = arrayFromList [] >>= testHighlighting
 
 ---------------------------------------------
 -- LightPlatformCodeInsightFixtureTestCase --
@@ -59,7 +62,7 @@ foreign import java unsafe getMyFixture
 -- EtaSyntaxHighlighterTest --
 ------------------------------
 
-data EtaSyntaxHighlighterTest = EtaSyntaxHighlighterTest (Object# EtaSyntaxHighlighterTest)
+data EtaSyntaxHighlighterTest = EtaSyntaxHighlighterTest
   @com.typelead.EtaSyntaxHighlighterTest
   deriving Class
 
@@ -71,11 +74,28 @@ testSimple :: Java EtaSyntaxHighlighterTest ()
 testSimple = do
   this <- getThis
   myFixture <- superCast this <.> getMyFixture
+
+  -- Start with a well-formed string literal.
   myFixture <.> configureLines
     [ "module Main where"
-    , "main = putStrLn \"Hello world" -- Unterminated string
+    , "main = putStrLn \"Hello world\""
     ]
-  myFixture <.> testHighlighting
+  myFixture <.> testHighlighting'
+
+  -- Make it unterminated.
+  myFixture <.> configureLines
+    [ "module Main where"
+    , "main = putStrLn \"Hello world"
+    ]
+  myFixture <.> testHighlighting'
+
+  -- Make it well-formed again.
+  myFixture <.> configureLines
+    [ "module Main where"
+    , "main = putStrLn \"Hello world\"" -- Unterminated string
+    ]
+  myFixture <.> testHighlighting'
+
   return ()
   where
   configureLines xs = configureByText (superCast etaFileType) (foldMap (<> "\n") xs)

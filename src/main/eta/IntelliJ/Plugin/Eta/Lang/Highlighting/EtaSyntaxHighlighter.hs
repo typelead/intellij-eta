@@ -23,7 +23,7 @@ type instance Inherits EtaSyntaxHighlighter = '[SyntaxHighlighterBase]
 foreign import java unsafe "@new" newEtaSyntaxHighlighter :: Java a EtaSyntaxHighlighter
 
 foreign export java getHighlightingLexer :: Java EtaSyntaxHighlighter Lexer
-getHighlightingLexer = superCastJ newEtaLexer
+getHighlightingLexer = superCastJ newEtaSyntaxHighlightingLexer
 
 foreign export java getTokenHighlights
   :: IElementType

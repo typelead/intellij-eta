@@ -1,1 +1,2 @@
 ITblockComment ('{-# OPTIONS_GHC -F -pgmF hspec-discover #-}')
+WHITE_SPACE ('\n\n')
