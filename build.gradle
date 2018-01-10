@@ -6,7 +6,7 @@ buildscript {
     mavenLocal()
 
     dependencies {
-      classpath 'com.typelead:gradle-eta:0.0.1-SNAPSHOT-f84f682'
+      classpath 'com.typelead:gradle-eta:0.0.1-SNAPSHOT-785fcdb'
     }
   }
 }
