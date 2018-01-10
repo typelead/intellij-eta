@@ -10,16 +10,16 @@ import IntelliJ.TestFramework.UsefulTestCase
 -- FileType --
 --------------
 
-data {-# CLASS "com.intellij.openapi.fileTypes.FileType" #-}
-  FileType = FileType (Object# FileType)
+data FileType = FileType
+  @com.intellij.openapi.fileTypes.FileType
   deriving Class
 
 -----------------
 -- EtaFileType --
 -----------------
 
-data {-# CLASS "com.typelead.intellij.plugin.eta.lang.EtaFileType" #-}
-  EtaFileType = EtaFileType (Object# EtaFileType)
+data EtaFileType = EtaFileType (Object# EtaFileType)
+  @com.typelead.intellij.plugin.eta.lang.EtaFileType
   deriving Class
 
 type instance Inherits EtaFileType = '[FileType]
@@ -32,8 +32,8 @@ foreign import java unsafe
 -- CodeInsightTestFixture --
 ----------------------------
 
-data {-# CLASS "com.intellij.testFramework.fixtures.CodeInsightTestFixture" #-}
-  CodeInsightTestFixture = CodeInsightTestFixture (Object# CodeInsightTestFixture)
+data CodeInsightTestFixture = CodeInsightTestFixture
+  @com.intellij.testFramework.fixtures.CodeInsightTestFixture
   deriving Class
 
 foreign import java unsafe "@interface" configureByText
@@ -46,8 +46,8 @@ foreign import java unsafe testHighlighting
 -- LightPlatformCodeInsightFixtureTestCase --
 ---------------------------------------------
 
-data {-# CLASS "com.typelead.intellij.test.LightPlatformCodeInsightFixtureTestCaseWrapper" #-}
-  LightPlatformCodeInsightFixtureTestCaseWrapper = LightPlatformCodeInsightFixtureTestCaseWrapper (Object# LightPlatformCodeInsightFixtureTestCaseWrapper)
+data LightPlatformCodeInsightFixtureTestCaseWrapper = LightPlatformCodeInsightFixtureTestCaseWrapper
+  @com.typelead.intellij.test.LightPlatformCodeInsightFixtureTestCaseWrapper
   deriving Class
 
 type instance Inherits LightPlatformCodeInsightFixtureTestCaseWrapper = '[UsefulTestCase]
@@ -59,8 +59,8 @@ foreign import java unsafe getMyFixture
 -- EtaSyntaxHighlighterTest --
 ------------------------------
 
-data {-# CLASS "com.typelead.EtaSyntaxHighlighterTest" #-}
-  EtaSyntaxHighlighterTest = EtaSyntaxHighlighterTest (Object# EtaSyntaxHighlighterTest)
+data EtaSyntaxHighlighterTest = EtaSyntaxHighlighterTest (Object# EtaSyntaxHighlighterTest)
+  @com.typelead.EtaSyntaxHighlighterTest
   deriving Class
 
 type instance Inherits EtaSyntaxHighlighterTest = '[LightPlatformCodeInsightFixtureTestCaseWrapper]
