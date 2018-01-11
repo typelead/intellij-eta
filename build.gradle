@@ -61,8 +61,8 @@ sandboxAddSourcesEta {
 task makeEtaParserSources(type: Exec) {
   workingDir file('eta-parser')
   commandLine = ['make', 'sources']
-  ['eta', 'java', 'patches', 'tools'].each { inputs.dir("eta-parser/$it") }
-  ['eta-parser.cabal', 'Makefile'].each { inputs.file("eta-parser/$it") }
+  ['eta', 'java', 'patches', 'tools'].each { inputs.dir(it) }
+  ['eta-parser.cabal', 'Makefile'].each { inputs.file(it) }
 }
 
 installDepsEta.dependsOn(hpack, makeEtaParserSources)
