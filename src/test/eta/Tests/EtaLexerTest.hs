@@ -1,103 +1,22 @@
 module Tests.EtaLexerTest where
 
 import P
-import FFI.Com.IntelliJ.Lexer.Lexer
-import FFI.Com.IntelliJ.RT.Execution.JUnit.FileComparisonFailure
-import qualified FFI.Com.IntelliJ.OpenApi.Util.IO.FileUtil as FileUtil
-import FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil
-import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
-import qualified JUnit.Framework.TestCase as T
-import IntelliJ.TestFramework.LexerTestCase
-import IntelliJ.TestFramework.UsefulTestCase
-import IntelliJ.TestFramework.VfsTestUtil
+import FFI.Com.IntelliJ.Lexer.Lexer (Lexer)
+import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer (newEtaParsingLexer)
+import Tests.Base.LexerTestCaseWrapper (LexerTestCaseWrapper, doTest)
+import Tests.Utils
 
--- TODO: We currently have to work around not being able to access protected methods
--- by extending a wrapper class which changes the access level to public.
-data {-# CLASS "com.typelead.intellij.test.LexerTestCaseWrapper" #-}
-  LexerTestCaseWrapper = LexerTestCaseWrapper (Object# LexerTestCaseWrapper)
-  deriving Class
-
-type instance Inherits LexerTestCaseWrapper = '[LexerTestCase]
-
-data {-# CLASS "com.typelead.EtaLexerTest" #-}
-  EtaLexerTest = EtaLexerTest (Object# EtaLexerTest)
+data EtaLexerTest = EtaLexerTest
+  @com.typelead.EtaLexerTest
   deriving Class
 
 type instance Inherits EtaLexerTest = '[LexerTestCaseWrapper]
 
 foreign export java "getDirPath" getDirPath :: Java EtaLexerTest JString
-getDirPath :: Java EtaLexerTest JString
-getDirPath = return dirPath
-
-dirPath :: JString
-dirPath = "src/test/resources/fixtures/eta"
+getDirPath = return "src/test/resources/fixtures/eta"
 
 foreign export java "createLexer" createLexer :: Java EtaLexerTest Lexer
-createLexer :: Java EtaLexerTest Lexer
 createLexer = superCast <$> newEtaParsingLexer
-
-doTest :: Java EtaLexerTest ()
-doTest = do
-  this <- getThis
-  testName <- this <.> getTestNameUpper
-  let fileName = testName <> ".hs"
-  text <- loadFile fileName
-  checkSegments text
-  result <- this <.> printTokens text 0
-  doCheckResult (myExpectPath <> jFileSeparator <> "expected") (testName <> ".txt") result
-  where
-  srcPath = dirPath <> jFileSeparator <> "sources"
-
-  myExpectPath = dirPath <> jFileSeparator <> "lexer"
-
-  loadFile name = doLoadFile srcPath name
-
-  doLoadFile myFullDataPath name =
-    convertLineSeparators <$> FileUtil.loadFile (myFullDataPath <> jFileSeparator <> name)
-
-  doCheckResult :: forall a. JString -> JString -> JString -> Java a ()
-  doCheckResult fullPath targetDataName tokenResult = run $ do
-    expectedText <- trim <$> doLoadFile fullPath targetDataName
-    when (expectedText /= text) $ throwFileComparisonFailure expectedText
-    where
-    text = trim tokenResult
-
-    expectedFileName = fullPath <> jFileSeparator <> targetDataName
-
-    throwFileComparisonFailure :: forall a. JString -> Java a ()
-    throwFileComparisonFailure expectedText =
-      throwJavaM $
-        newFileComparisonFailure
-          targetDataName expectedText text expectedFileName
-
-    run :: forall b. (forall a. Java a ()) -> Java b ()
-    run f = io $ catch (java f) $ \(e :: FileNotFoundException) -> java $ do
-      overwriteTestData expectedFileName text
-      T.fail $ ("No output text found. File " <> expectedFileName <> "created." :: JString)
-
-checkSegments :: JString -> Java EtaLexerTest ()
-checkSegments text = do
-  let len = jStringLength text
-  lexer <- createLexer
-  lexer <.> start (superCast text) 0 len 0
-  (lexer <.> getTokenType) >>= (if len == 0 then assertNothing else assertJust)
-  loop lexer 0
-  where
-  loop lexer lastEnd = do
-    (lexer <.> getTokenStart) >>= assertEq lastEnd
-    lastEnd' <- lexer <.> getTokenEnd
-    lexer <.> advance
-    typ <- lexer <.> getTokenType
-    when (isJust typ) $ loop lexer lastEnd'
-
-assertEq :: (Show a, Eq a) => a -> a -> Java b ()
-assertEq x y = when (x /= y) $ T.fail $ toJString $ show x ++ " /= " ++ show y
-
-assertNothing :: Show a => Maybe a -> Java b ()
-assertNothing mx = when (isJust mx) $ T.fail $ toJString $ "Expected Nothing, got " ++ show mx
-
-assertJust :: Maybe a -> Java b ()
-assertJust mx = when (isNothing mx) $ T.fail "Expected Just, got Nothing"
 
 foreign export java testArrow00001 :: Java EtaLexerTest ()
 testArrow00001 = doTest
