@@ -6,10 +6,15 @@ import FFI.Com.IntelliJ.RT.Execution.JUnit.FileComparisonFailure (newFileCompari
 import qualified FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil as StringUtil
 import qualified FFI.Com.IntelliJ.OpenApi.Util.IO.FileUtil as FileUtil
 import IntelliJ.TestFramework.UsefulTestCase
-import IntelliJ.TestFramework.LexerTestCase (LexerTestCase)
 import IntelliJ.TestFramework.VfsTestUtil (overwriteTestData)
 import qualified JUnit.Framework.TestCase as T
 import Tests.Utils
+
+data LexerTestCase = LexerTestCase
+  @com.intellij.testFramework.LexerTestCase
+  deriving Class
+
+type instance Inherits LexerTestCase = '[Object, UsefulTestCase]
 
 -- TODO: We currently have to work around not being able to access protected methods
 -- by extending a wrapper class which changes the access level to public.

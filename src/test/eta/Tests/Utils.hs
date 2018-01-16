@@ -1,7 +1,6 @@
 module Tests.Utils where
 
 import P
-import IntelliJ.TestFramework.LexerTestCase
 import qualified JUnit.Framework.TestCase as T
 
 assertEq :: (Show a, Eq a) => a -> a -> Java b ()
