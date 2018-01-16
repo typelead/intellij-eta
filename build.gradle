@@ -72,6 +72,18 @@ installDepsEta.dependsOn(hpack, makeEtaParserSources)
   it.outputs.dir('.cabal-sandbox/lib')
 }
 
+task runJFlex(type: Exec) {
+  commandLine './tools/run-jflex'
+}
+
+task cleanJFlex(type: Exec) {
+  commandLine './tools/run-jflex', 'clean'
+}
+
+compileJava.dependsOn(runJFlex)
+
+clean.dependsOn(cleanJFlex)
+
 compileEta {
   inputs.dir('src/main/eta')
   outputs.files('build/etlas/dist/build/HSintellij-eta*.jar')

@@ -10,9 +10,8 @@ import FFI.Com.IntelliJ.OpenApi.Editor.Colors.TextAttributesKey
 import FFI.Com.IntelliJ.OpenApi.Editor.DefaultLanguageHighlighterColors
 import FFI.Com.IntelliJ.OpenApi.Project.FileTypes.SyntaxHighlighterBase
 import FFI.Com.IntelliJ.Psi.Tree.IElementType
+import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Lexer.EtaSyntaxHighlightingLexer
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Psi.EtaTokenTypes
-
-import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
 
 data {-# CLASS "com.typelead.intellij.eta.lang.highlighting.EtaSyntaxHighlighter" #-}
   EtaSyntaxHighlighter = EtaSyntaxHighlighter (Object# EtaSyntaxHighlighter)

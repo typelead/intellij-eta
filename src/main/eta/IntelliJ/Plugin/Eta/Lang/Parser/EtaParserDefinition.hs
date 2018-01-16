@@ -24,7 +24,7 @@ data {-# CLASS "com.typelead.intellij.plugin.eta.lang.parser.EtaParserDefinition
 
 foreign export java "createLexer" createLexer
   :: Project -> Java EtaParserDefinition Lexer
-createLexer _ = superCastJ newEtaSyntaxHighlightingLexer
+createLexer _ = superCastJ newEtaParsingLexer
 
 foreign export java "createParser" createParser
   :: Project -> Java EtaParserDefinition PsiParser

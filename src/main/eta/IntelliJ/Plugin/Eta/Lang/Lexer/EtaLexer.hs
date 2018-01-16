@@ -1,7 +1,6 @@
 module IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
  ( EtaLexer(..)
  , newEtaParsingLexer
- , newEtaSyntaxHighlightingLexer
  ) where
 
 import P
@@ -39,11 +38,12 @@ type instance Inherits EtaLexer = '[AbstractEtaLexer]
 newEtaParsingLexer :: Java a EtaLexer
 newEtaParsingLexer = unsafeNewEtaLexer
 
-newEtaSyntaxHighlightingLexer :: Java a EtaLexer
-newEtaSyntaxHighlightingLexer = do
-  lexer <- unsafeNewEtaLexer
-  lexer <.> setSkipVirtual True
-  return lexer
+-- We'll use EtaSyntaxHighlightingLexer instead.
+-- newEtaSyntaxHighlightingLexer :: Java a EtaLexer
+-- newEtaSyntaxHighlightingLexer = do
+--   lexer <- unsafeNewEtaLexer
+--   lexer <.> setSkipVirtual True
+--   return lexer
 
 foreign import java unsafe "@new" unsafeNewEtaLexer :: Java a EtaLexer
 
