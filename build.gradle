@@ -46,6 +46,7 @@ repositories {
 }
 
 dependencies {
+  testCompile fileTree(dir: 'build/etlas/dist/build', include: 'HSintellij-eta-*.jar')
 }
 
 task hpack(type: Exec) {
@@ -89,13 +90,7 @@ compileEta {
   outputs.files('build/etlas/dist/build/HSintellij-eta*.jar')
 }
 
-task configureCompileTestJava {
-  doLast {
-    compileTestJava.classpath += files(getEtaRuntimeClasspath())
-  }
-}
-
-compileTestJava.dependsOn(compileEta, configureCompileTestJava)
+compileTestJava.dependsOn(compileEta)
 
 testCompileEta {
   inputs.files('src/test/eta')
