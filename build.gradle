@@ -89,10 +89,20 @@ compileEta {
   outputs.files('build/etlas/dist/build/HSintellij-eta*.jar')
 }
 
+task configureCompileTestJava {
+  doLast {
+    compileTestJava.classpath += files(getEtaRuntimeClasspath())
+  }
+}
+
+compileTestJava.dependsOn(compileEta, configureCompileTestJava)
+
 testCompileEta {
   inputs.files('src/test/eta')
   outputs.files('build/etlas/dist/build/test/test.jar')
 }
+
+testCompileEta.dependsOn(compileTestJava)
 
 prepareSandbox {
   doLast {
@@ -175,6 +185,8 @@ testClasses {
     }
   }
 }
+
+testClasses.dependsOn(testCompileEta)
 
 task configureTest {
   dependsOn testCompileEta

@@ -1,7 +1,5 @@
 module Main where
 
 import P
-import JUnit
-import Tests
 
-main = testMain testClasses
+main = error "Use `./gradlew test` to run tests"
