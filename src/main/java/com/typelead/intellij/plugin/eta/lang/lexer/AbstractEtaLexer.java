@@ -15,7 +15,6 @@ public abstract class AbstractEtaLexer extends LexerBase {
   public int myPStatePtr;
 
   public boolean done;
-  public boolean skipVirtual;
   public int myState;
   public int myTokenStart;
   public int myTokenEnd;

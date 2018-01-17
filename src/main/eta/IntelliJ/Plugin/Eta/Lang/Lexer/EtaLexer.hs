@@ -53,9 +53,6 @@ foreign import java unsafe "@field myPStatePtr" setMyPStatePtr :: StablePtr (IOR
 foreign import java unsafe "@field done" getDone :: Java EtaLexer Bool
 foreign import java unsafe "@field done" setDone :: Bool -> Java EtaLexer ()
 
-foreign import java unsafe "@field skipVirtual" getSkipVirtual :: Java EtaLexer Bool
-foreign import java unsafe "@field skipVirtual" setSkipVirtual :: Bool -> Java EtaLexer ()
-
 foreign import java unsafe "@field myState" getMyState :: Java EtaLexer Int
 foreign import java unsafe "@field myState" setMyState :: Int -> Java EtaLexer ()
 
@@ -183,12 +180,7 @@ advance = do
 
                       -- TODO: Should probably log that we weren't able to retrieve position info.
                       _ -> (myTokenStart, myBufferEnd, T.badCharacter)
-              skipVirtual <- getSkipVirtual
-              -- Virtual tokens have the same start/end offset, so skip them if
-              -- skipVirtual == true; this is needed for the syntax highlighter.
-              if skipVirtual && startOffset == endOffset then
-                advance
-              else if startOffset == myTokenStart then do
+              if startOffset == myTokenStart then do
                 setMyTokenType iElementType
                 setMyTokenEnd endOffset
                 debugLexer (startOffset, endOffset, token, srcSpan)
