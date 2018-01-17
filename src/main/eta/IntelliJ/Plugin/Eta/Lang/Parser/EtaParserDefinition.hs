@@ -15,7 +15,7 @@ import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.EtaLanguage
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Psi.EtaFile
 import FFI.Com.TypeLead.IntelliJ.Utils.Parser.SimplePsiParser
 
-import IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
+import IntelliJ.Plugin.Eta.Lang.Lexer.EtaParsingLexer (newEtaParsingLexer)
 import IntelliJ.Plugin.Eta.Lang.Psi.EtaElementFactory
 
 data {-# CLASS "com.typelead.intellij.plugin.eta.lang.parser.EtaParserDefinition implements com.intellij.lang.ParserDefinition" #-}

@@ -1,5 +1,5 @@
-module IntelliJ.Plugin.Eta.Lang.Lexer.EtaLexer
- ( EtaLexer(..)
+module IntelliJ.Plugin.Eta.Lang.Lexer.EtaParsingLexer
+ ( EtaParsingLexer(..)
  , newEtaParsingLexer
  ) where
 
@@ -23,64 +23,64 @@ import Language.Eta.Utils.StringBuffer
 
 import IntelliJ.Plugin.Eta.Lang.Utils
 
-data AbstractEtaLexer = AbstractEtaLexer
-  @com.typelead.intellij.plugin.eta.lang.lexer.AbstractEtaLexer
+data AbstractEtaParsingLexer = AbstractEtaParsingLexer
+  @com.typelead.intellij.plugin.eta.lang.lexer.AbstractEtaParsingLexer
   deriving Class
 
-type instance Inherits AbstractEtaLexer = '[Object, Lexer]
+type instance Inherits AbstractEtaParsingLexer = '[Object, Lexer]
 
-data EtaLexer = EtaLexer
-  @com.typelead.intellij.plugin.eta.lang.lexer.EtaLexer
+data EtaParsingLexer = EtaParsingLexer
+  @com.typelead.intellij.plugin.eta.lang.lexer.EtaParsingLexer
   deriving Class
 
-type instance Inherits EtaLexer = '[AbstractEtaLexer]
+type instance Inherits EtaParsingLexer = '[AbstractEtaParsingLexer]
 
-newEtaParsingLexer :: Java a EtaLexer
-newEtaParsingLexer = unsafeNewEtaLexer
+newEtaParsingLexer :: Java a EtaParsingLexer
+newEtaParsingLexer = unsafeNewEtaParsingLexer
 
 -- We'll use EtaSyntaxHighlightingLexer instead.
--- newEtaSyntaxHighlightingLexer :: Java a EtaLexer
+-- newEtaSyntaxHighlightingLexer :: Java a EtaParsingLexer
 -- newEtaSyntaxHighlightingLexer = do
---   lexer <- unsafeNewEtaLexer
+--   lexer <- unsafeNewEtaParsingLexer
 --   lexer <.> setSkipVirtual True
 --   return lexer
 
-foreign import java unsafe "@new" unsafeNewEtaLexer :: Java a EtaLexer
+foreign import java unsafe "@new" unsafeNewEtaParsingLexer :: Java a EtaParsingLexer
 
-foreign import java unsafe "@field myPStatePtr" getMyPStatePtr :: Java EtaLexer (StablePtr (IORef L.PState))
-foreign import java unsafe "@field myPStatePtr" setMyPStatePtr :: StablePtr (IORef L.PState) -> Java EtaLexer ()
+foreign import java unsafe "@field myPStatePtr" getMyPStatePtr :: Java EtaParsingLexer (StablePtr (IORef L.PState))
+foreign import java unsafe "@field myPStatePtr" setMyPStatePtr :: StablePtr (IORef L.PState) -> Java EtaParsingLexer ()
 
-foreign import java unsafe "@field done" getDone :: Java EtaLexer Bool
-foreign import java unsafe "@field done" setDone :: Bool -> Java EtaLexer ()
+foreign import java unsafe "@field done" getDone :: Java EtaParsingLexer Bool
+foreign import java unsafe "@field done" setDone :: Bool -> Java EtaParsingLexer ()
 
-foreign import java unsafe "@field myState" getMyState :: Java EtaLexer Int
-foreign import java unsafe "@field myState" setMyState :: Int -> Java EtaLexer ()
+foreign import java unsafe "@field myState" getMyState :: Java EtaParsingLexer Int
+foreign import java unsafe "@field myState" setMyState :: Int -> Java EtaParsingLexer ()
 
-foreign import java unsafe "@field myTokenStart" getMyTokenStart :: Java EtaLexer Int
-foreign import java unsafe "@field myTokenStart" setMyTokenStart :: Int -> Java EtaLexer ()
+foreign import java unsafe "@field myTokenStart" getMyTokenStart :: Java EtaParsingLexer Int
+foreign import java unsafe "@field myTokenStart" setMyTokenStart :: Int -> Java EtaParsingLexer ()
 
-foreign import java unsafe "@field myTokenEnd" getMyTokenEnd :: Java EtaLexer Int
-foreign import java unsafe "@field myTokenEnd" setMyTokenEnd :: Int -> Java EtaLexer ()
+foreign import java unsafe "@field myTokenEnd" getMyTokenEnd :: Java EtaParsingLexer Int
+foreign import java unsafe "@field myTokenEnd" setMyTokenEnd :: Int -> Java EtaParsingLexer ()
 
-foreign import java unsafe "@field myBuffer" getMyBuffer :: Java EtaLexer CharSequence
-foreign import java unsafe "@field myBuffer" setMyBuffer :: CharSequence -> Java EtaLexer ()
+foreign import java unsafe "@field myBuffer" getMyBuffer :: Java EtaParsingLexer CharSequence
+foreign import java unsafe "@field myBuffer" setMyBuffer :: CharSequence -> Java EtaParsingLexer ()
 
-foreign import java unsafe "@field myBufferEnd" getMyBufferEnd :: Java EtaLexer Int
-foreign import java unsafe "@field myBufferEnd" setMyBufferEnd :: Int -> Java EtaLexer ()
+foreign import java unsafe "@field myBufferEnd" getMyBufferEnd :: Java EtaParsingLexer Int
+foreign import java unsafe "@field myBufferEnd" setMyBufferEnd :: Int -> Java EtaParsingLexer ()
 
-foreign import java unsafe "@field myTokenType" getMyTokenType :: Java EtaLexer IElementType
-foreign import java unsafe "@field myTokenType" setMyTokenType :: IElementType -> Java EtaLexer ()
+foreign import java unsafe "@field myTokenType" getMyTokenType :: Java EtaParsingLexer IElementType
+foreign import java unsafe "@field myTokenType" setMyTokenType :: IElementType -> Java EtaParsingLexer ()
 
-foreign import java unsafe "@field myNextTokenType" getMyNextTokenType :: Java EtaLexer IElementType
-foreign import java unsafe "@field myNextTokenType" setMyNextTokenType :: IElementType -> Java EtaLexer ()
+foreign import java unsafe "@field myNextTokenType" getMyNextTokenType :: Java EtaParsingLexer IElementType
+foreign import java unsafe "@field myNextTokenType" setMyNextTokenType :: IElementType -> Java EtaParsingLexer ()
 
-foreign import java unsafe "@field myNextTokenStart" getMyNextTokenStart :: Java EtaLexer Int
-foreign import java unsafe "@field myNextTokenStart" setMyNextTokenStart :: Int -> Java EtaLexer ()
+foreign import java unsafe "@field myNextTokenStart" getMyNextTokenStart :: Java EtaParsingLexer Int
+foreign import java unsafe "@field myNextTokenStart" setMyNextTokenStart :: Int -> Java EtaParsingLexer ()
 
-foreign import java unsafe "@field myNextTokenEnd" getMyNextTokenEnd :: Java EtaLexer Int
-foreign import java unsafe "@field myNextTokenEnd" setMyNextTokenEnd :: Int -> Java EtaLexer ()
+foreign import java unsafe "@field myNextTokenEnd" getMyNextTokenEnd :: Java EtaParsingLexer Int
+foreign import java unsafe "@field myNextTokenEnd" setMyNextTokenEnd :: Int -> Java EtaParsingLexer ()
 
-foreign export java start :: CharSequence -> Int -> Int -> Int -> Java EtaLexer ()
+foreign export java start :: CharSequence -> Int -> Int -> Int -> Java EtaParsingLexer ()
 start buf startOffset endOffset initialState = do
   -- debugTokenStream pState
   setMyPStatePtr =<< mkPtr
@@ -118,7 +118,7 @@ start buf startOffset endOffset initialState = do
 charSeqToStringBuffer :: CharSequence -> StringBuffer
 charSeqToStringBuffer = stringToStringBuffer . fromJString . toStringJava
 
-foreign export java advance :: Java EtaLexer ()
+foreign export java advance :: Java EtaParsingLexer ()
 advance = do
   done <- getDone
   if done then
@@ -214,7 +214,7 @@ advance = do
 doDebugLexer :: Bool
 doDebugLexer = Unsafe.unsafePerformIO $ isJust <$> lookupEnv "DEBUG_LEXER"
 
-debugLexer :: Show a => a -> Java EtaLexer ()
+debugLexer :: Show a => a -> Java EtaParsingLexer ()
 debugLexer info = when doDebugLexer $ do
   myState <- getMyState
   text <- getTokenText
@@ -235,7 +235,7 @@ debugLexer info = when doDebugLexer $ do
     , ("info", show info)
     ]
 
-debugTokenStream :: StringBuffer -> RealSrcLoc -> DynFlags -> Java EtaLexer ()
+debugTokenStream :: StringBuffer -> RealSrcLoc -> DynFlags -> Java EtaParsingLexer ()
 debugTokenStream buf loc flags = when doDebugLexer $ io $
   case L.lexTokenStream buf loc flags of
     L.POk _ tokens -> do

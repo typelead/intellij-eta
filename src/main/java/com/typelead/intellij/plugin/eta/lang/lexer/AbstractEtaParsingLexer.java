@@ -5,8 +5,8 @@ import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/** Infrastructure required for implementing the EtaLexer from Eta. */
-public abstract class AbstractEtaLexer extends LexerBase {
+/** Infrastructure required for implementing the EtaParsingLexer from Eta. */
+public abstract class AbstractEtaParsingLexer extends LexerBase {
 
   // TODO: Ideally these should be PROTECTED; however, this makes it impossible to access
   // from Eta without security access exceptions.

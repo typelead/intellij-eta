@@ -5,9 +5,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class EtaLexerTest extends AbstractEtaLexerTest {
+public class EtaParsingLexerTest extends AbstractEtaLexerTest {
 
-  public EtaLexerTest(String testName) {
+  public EtaParsingLexerTest(String testName) {
     super(testName);
   }
 
@@ -18,7 +18,7 @@ public class EtaLexerTest extends AbstractEtaLexerTest {
 
   @Override
   protected Lexer createLexer() {
-    return new EtaLexer();
+    return new EtaParsingLexer();
   }
 
   @Override
