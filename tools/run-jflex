@@ -18,7 +18,7 @@ usage() {
 
 # Names without extensions, this way we can add .java or .flex as needed.
 names=(
-src/main/java/com/typelead/intellij/plugin/eta/lang/lexer/_EtaSyntaxHighlightingLexer
+plugin/src/main/java/com/typelead/intellij/plugin/eta/lang/lexer/_EtaSyntaxHighlightingLexer
 )
 
 main() {

@@ -1,0 +1,22 @@
+name:                 ${NAME}
+version:              ${PACKAGE_VERSION}
+synopsis:             ${SYNOPSIS}
+-- description:
+-- license:
+-- license-file:
+homepage:             ${HOMEPAGE}
+author:               ${AUTHOR}
+maintainer:           ${MAINTAINER}
+category:             ${CATEGORY}
+-- copyright:
+build-type:           Simple
+-- extra-source-files:
+cabal-version:        ${CABAL_VERSION}
+
+library
+  -- exposed-modules:
+  -- other-modules:
+  -- other-extensions:
+  build-depends:        base >= 4.7 && < 5
+  hs-source-dirs:       ${SOURCE_DIR}
+  default-language:     ${LANGUAGE}
