@@ -25,6 +25,7 @@ dependencies:
 - base >=4.8 && <4.9
 - containers == 0.5.10.2
 - eta-parser
+- eta-java-interop
 
 library:
   source-dirs: src/main/eta
