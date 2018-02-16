@@ -13,14 +13,14 @@ You will also need the command line tool [hpack](https://github.com/sol/hpack)
 
 ## Running
 
-You can run a sandboxed version of the plugin with -
+You can run a sandboxed version of the plugin with:
 
 ```
-% ./gradlew runIde
+./gradlew runIde
 ```
 
 ## Testing
 
 ```
-% ./gradlew test
+./gradlew test
 ```
