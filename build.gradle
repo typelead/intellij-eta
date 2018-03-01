@@ -90,8 +90,8 @@ project(':plugin') {
 
   sandboxAddSourcesEta {
     sources = ['../eta-parser']
-    inputs.property('etlas_add_source', sources)
-    outputs.files('.cabal-sandbox/add-source-timestamps')
+    inputs.files('../eta-parser/eta-parser.cabal')
+    outputs.files('../.cabal-sandbox/add-source-timestamps')
   }
 
   installDepsEta.dependsOn(hpack, makeEtaParserSources)
