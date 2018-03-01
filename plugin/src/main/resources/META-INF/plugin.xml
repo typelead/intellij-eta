@@ -1,0 +1,23 @@
+<idea-plugin use-idea-classloader="true">
+  <id>com.typelead</id>
+  <name>IntelliJ-Eta</name>
+  <vendor url="http://typelead.com/">TypeLead</vendor>
+
+  <description>Eta language support for IntelliJ IDEA.</description>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <framework.type implementation="com.typelead.intellij.plugin.eta.project.template.EtaFrameworkType"/>
+    <fileTypeFactory implementation="com.typelead.intellij.plugin.eta.lang.psi.EtaFileTypeFactory"/>
+    <lang.syntaxHighlighterFactory
+      language="Eta"
+      implementationClass="com.typelead.intellij.plugin.eta.lang.highlighting.EtaSyntaxHighlighterFactory"
+    />
+    <lang.parserDefinition
+      language="Eta"
+      implementationClass="com.typelead.intellij.plugin.eta.lang.parser.EtaParserDefinition"
+    />
+    <projectTemplatesFactory
+      implementation="com.typelead.intellij.plugin.eta.project.template.EtaProjectTemplatesFactory"
+    />
+  </extensions>
+</idea-plugin>
