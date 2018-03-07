@@ -20,9 +20,9 @@ testMain classes = do
   where
   runTests :: IO Result
   runTests = java $ do
-    classes <- arrayFromList
+    classes' <- arrayFromList
       (map (\(JClassAny cls) -> unsafeCoerce cls) classes :: [JClass Object])
-    runClasses classes
+    runClasses classes'
 
 foreign import java unsafe "@static java.lang.System.exit"
   exit :: Int -> Java a ()

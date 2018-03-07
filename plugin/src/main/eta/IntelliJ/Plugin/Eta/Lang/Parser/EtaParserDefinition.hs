@@ -10,7 +10,6 @@ import FFI.Com.IntelliJ.Psi
 import FFI.Com.IntelliJ.Psi.Tree
 import qualified FFI.Com.IntelliJ.Psi.TokenType as TokenType
 import qualified FFI.Com.IntelliJ.Psi.Tree.TokenSet as TokenSet
-import FFI.Com.IntelliJ.OpenApi.Project
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.EtaLanguage
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Psi.EtaFile
 import FFI.Com.TypeLead.IntelliJ.Utils.Parser.SimplePsiParser
@@ -28,7 +27,7 @@ createLexer _ = superCastJ newEtaParsingLexer
 
 foreign export java "createParser" createParser
   :: Project -> Java EtaParserDefinition PsiParser
-createParser project = superCastJ newSimplePsiParser
+createParser _project = superCastJ newSimplePsiParser
 
 {-# NOINLINE fileNodeType #-}
 fileNodeType :: IFileElementType
@@ -64,4 +63,4 @@ createFile fvp = superCastJ $ newEtaFile fvp
 
 foreign export java "spaceExistanceTypeBetweenTokens" spaceExistanceTypeBetweenTokens
   :: ASTNode -> ASTNode -> Java EtaParserDefinition SpaceRequirements
-spaceExistanceTypeBetweenTokens left right = return SpaceRequirements.may
+spaceExistanceTypeBetweenTokens _left _right = return SpaceRequirements.may

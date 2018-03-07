@@ -27,6 +27,13 @@ dependencies:
 - eta-parser
 - eta-java-interop
 
+ghc-options:
+  -Werror
+  -Wall
+  -fno-warn-orphans
+  -fno-warn-missing-signatures
+  -fno-warn-unused-binds
+
 library:
   source-dirs: src/main/eta
 

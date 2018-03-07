@@ -2,7 +2,7 @@ module IntelliJ.Plugin.Eta.Project.Template.EtaProjectTemplatesFactory where
 
 import P.Base
 import FFI.Com.IntelliJ.Ide.Util.ProjectWizard.WizardContext (WizardContext)
-import FFI.Com.IntelliJ.Platform.ProjectTemplate (ProjectTemplate, ProjectTemplateArray)
+import FFI.Com.IntelliJ.Platform.ProjectTemplate (ProjectTemplateArray)
 import FFI.Com.IntelliJ.Platform.ProjectTemplatesFactory (ProjectTemplatesFactory)
 import IntelliJ.Plugin.Eta.Project.Template.EtlasProjectTemplate (newEtlasProjectTemplate, toProjectTemplate)
 

@@ -1,7 +1,6 @@
 module FFI.Org.JetBrains.JPS.Model.Serialization.JpsModelSerializationDataService where
 
 import P
-import Java.Utils
 import Interop.Java.IO
 import FFI.Org.JetBrains.JPS.Model.JpsProject
 

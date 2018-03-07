@@ -4,7 +4,6 @@ import P
 
 import FFI.Com.IntelliJ.OpenApi.Project.FileTypes.SyntaxHighlighter
 import FFI.Com.IntelliJ.OpenApi.Project.FileTypes.SyntaxHighlighterFactory
-import FFI.Com.IntelliJ.OpenApi.Project.Project
 import FFI.Com.IntelliJ.OpenApi.Vfs.VirtualFile
 
 import IntelliJ.Plugin.Eta.Lang.Highlighting.EtaSyntaxHighlighter
