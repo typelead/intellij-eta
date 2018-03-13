@@ -14,10 +14,10 @@ import Data.List as X (intercalate)
 import Data.Maybe as X
 import Data.Monoid as X
 import Data.Typeable
-import GHC.Base (isTrue#, isNullObject#, unJava)
+import GHC.Base (isTrue#, isNullObject#)
 import Java as X (
   JArray(..), type (<:), Object, JString, JStringArray, Class(..), JClass(..),
-  Object#, Java(..), CharSequence(..), Inherits(..), Short(..), JavaConverter(..),
+  Object#, Java(..), CharSequence(..), Inherits, Short(..), JavaConverter(..),
   withThis, arrayFromList, arrayToList, io, java, (<.>), fromJava, superCast, unsafeCast,
   unsafePerformJava,
   (>-)
@@ -36,7 +36,6 @@ unsafeCoerce = Unsafe.Coerce.unsafeCoerce
 
 superCastJ :: (a <: b) => Java x a -> Java x b
 superCastJ = (superCast <$>)
---superCastJ = unsafeCoerce
 
 type JavaEnum = Java.Utils.Enum
 

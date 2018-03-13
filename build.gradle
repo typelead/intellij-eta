@@ -90,6 +90,8 @@ project(':plugin') {
 
   sandboxAddSourcesEta {
     sources = ['../eta-parser']
+    // TODO: This helps with incremental compilation but isn't perfect
+    // Use `touch` on these files to get this task to rerun.
     inputs.files('../eta-parser/eta-parser.cabal')
     outputs.files('../.cabal-sandbox/add-source-timestamps')
   }

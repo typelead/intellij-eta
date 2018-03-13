@@ -76,25 +76,25 @@ testSimple = do
   myFixture <- superCast this <.> getMyFixture
 
   -- Start with a well-formed string literal.
-  myFixture <.> configureLines
+  _ <- myFixture <.> configureLines
     [ "module Main where"
     , "main = putStrLn \"Hello world\""
     ]
-  myFixture <.> testHighlighting'
+  _ <- myFixture <.> testHighlighting'
 
   -- Make it unterminated.
-  myFixture <.> configureLines
+  _ <- myFixture <.> configureLines
     [ "module Main where"
     , "main = putStrLn \"Hello world"
     ]
-  myFixture <.> testHighlighting'
+  _ <- myFixture <.> testHighlighting'
 
   -- Make it well-formed again.
-  myFixture <.> configureLines
+  _ <- myFixture <.> configureLines
     [ "module Main where"
     , "main = putStrLn \"Hello world\"" -- Unterminated string
     ]
-  myFixture <.> testHighlighting'
+  _ <- myFixture <.> testHighlighting'
 
   return ()
   where

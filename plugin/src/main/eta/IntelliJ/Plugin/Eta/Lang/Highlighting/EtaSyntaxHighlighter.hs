@@ -3,7 +3,6 @@ module IntelliJ.Plugin.Eta.Lang.Highlighting.EtaSyntaxHighlighter where
 import P
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
-import Debug.Trace
 
 import FFI.Com.IntelliJ.Lexer.Lexer
 import FFI.Com.IntelliJ.OpenApi.Editor.Colors.TextAttributesKey
@@ -54,7 +53,7 @@ keys = mkMap
   , [jITconsym, jITqconsym] =: kETA_CONSYM
   ]
   where
-  mkMap ks = M.fromList $ ks >>= \(ks, v) -> [(k, v) | k <- ks]
+  mkMap ks = M.fromList $ ks >>= \(ks', v) -> [(k, v) | k <- ks']
   (=:) = (,)
 
 kETA_RESERVED_ID = createTextAttributesKey "ETA_RESERVED_ID" kKEYWORD

@@ -5,20 +5,19 @@ import P
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.EmptyModuleBuilder (EmptyModuleBuilder)
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.JavaModuleBuilder (JavaModuleBuilder)
 import qualified FFI.Com.IntelliJ.Ide.Util.ProjectWizard.JavaModuleBuilder as JavaModuleBuilder
-import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.ModuleBuilder (ModuleBuilder, addModuleConfigurationUpdater)
+import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.ModuleBuilder (addModuleConfigurationUpdater)
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.ModuleWizardStep (ModuleWizardStep, ModuleWizardStepArray, updateDataModel)
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.SettingsStep (SettingsStep, addSettingsField)
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.WizardContext (WizardContext, isCreatingNewProject)
 import           FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Project.Module.EtlasModuleType (getEtlasModuleType)
 import qualified FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Settings.EtaBuildSettings as EtaBuildSettings
-import           FFI.Com.IntelliJ.OpenApi.Module.JavaModuleType (JavaModuleType, getJavaModuleType)
+import           FFI.Com.IntelliJ.OpenApi.Module.JavaModuleType (getJavaModuleType)
 import           FFI.Com.IntelliJ.OpenApi.Module.ModuleType (ModuleType, modifyProjectTypeStep)
 import           FFI.Com.IntelliJ.OpenApi.Roots.ContentEntry (getUrl, addExcludeFolderStr)
-import           FFI.Com.IntelliJ.OpenApi.Roots.ExcludeFolder (ExcludeFolder)
 import           FFI.Com.IntelliJ.OpenApi.Roots.ModifiableRootModel (ModifiableRootModel, getContentEntries)
 import           FFI.Com.IntelliJ.OpenApi.Roots.UI.Configuration.ModulesProvider (ModulesProvider)
 import           FFI.Com.IntelliJ.OpenApi.UI.TextFieldWithBrowseButton (TextFieldWithBrowseButton, newTextFieldWithBrowseButton)
-import           FFI.Com.IntelliJ.UI.TextAccessor (getText, setText)
+import           FFI.Com.IntelliJ.UI.TextAccessor (getText)
 import           FFI.Javax.Swing.JComponent
 
 import           IntelliJ.Plugin.Util.Wizard
@@ -43,8 +42,8 @@ createWizardSteps
   :: WizardContext
   -> ModulesProvider
   -> Java EtlasModuleBuilder ModuleWizardStepArray
-createWizardSteps wizardContext modulesProvider = do
-  isNewProj <- wizardContext <.> isCreatingNewProject
+createWizardSteps wizardContext _modulesProvider = do
+  _isNewProj <- wizardContext <.> isCreatingNewProject
   -- TODO
   arrayFromList []
 --   if isNewProj then do
@@ -93,7 +92,7 @@ newEtaStep moduleBuilder settingsStep = do
 
   let mkModuleWizardStepUpdateDataModel = do
         javaStep <.> updateDataModel
-        moduleBuilder <.> addModuleConfigurationUpdater (\module_ rootModel -> do
+        moduleBuilder <.> addModuleConfigurationUpdater (\_module rootModel -> do
           project <- rootModel <.> getProject
           buildSettings <- EtaBuildSettings.getInstance project
           (etaPathField <.> getText) >>= (\s -> buildSettings <.> EtaBuildSettings.setEtaPath s)
@@ -103,4 +102,5 @@ newEtaStep moduleBuilder settingsStep = do
   mkModuleWizardStep MkModuleWizardStep {..}
   where
   -- TODO: Need to GuiUtil.addFolderListener, locateExecutableByGuessing, etc.
-  newPathField name = newTextFieldWithBrowseButton
+  newPathField :: JString -> Java a TextFieldWithBrowseButton
+  newPathField _name = newTextFieldWithBrowseButton

@@ -9,10 +9,10 @@ import Foreign.StablePtr
 import System.Environment
 import qualified System.IO.Unsafe as Unsafe
 
-import FFI.Com.IntelliJ.Lexer.Lexer (Lexer, getTokenText)
+import FFI.Com.IntelliJ.Lexer.Lexer (getTokenText)
 import FFI.Com.IntelliJ.OpenApi.Util.Text.StringUtil (lineColToOffset)
-import FFI.Com.IntelliJ.Psi.Tree (IElementType)
 import qualified FFI.Com.IntelliJ.Psi.TokenType as T
+import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Lexer.AbstractEtaParsingLexer
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Psi.EtaTokenTypes (tokenToIElementType)
 
 import qualified Language.Eta.Parser.Lexer as L
@@ -23,12 +23,6 @@ import Language.Eta.Utils.StringBuffer
 
 import IntelliJ.Plugin.Eta.Lang.Utils
 
-data AbstractEtaParsingLexer = AbstractEtaParsingLexer
-  @com.typelead.intellij.plugin.eta.lang.lexer.AbstractEtaParsingLexer
-  deriving Class
-
-type instance Inherits AbstractEtaParsingLexer = '[Object, Lexer]
-
 data EtaParsingLexer = EtaParsingLexer
   @com.typelead.intellij.plugin.eta.lang.lexer.EtaParsingLexer
   deriving Class
@@ -38,51 +32,11 @@ type instance Inherits EtaParsingLexer = '[AbstractEtaParsingLexer]
 newEtaParsingLexer :: Java a EtaParsingLexer
 newEtaParsingLexer = unsafeNewEtaParsingLexer
 
--- We'll use EtaSyntaxHighlightingLexer instead.
--- newEtaSyntaxHighlightingLexer :: Java a EtaParsingLexer
--- newEtaSyntaxHighlightingLexer = do
---   lexer <- unsafeNewEtaParsingLexer
---   lexer <.> setSkipVirtual True
---   return lexer
-
 foreign import java unsafe "@new" unsafeNewEtaParsingLexer :: Java a EtaParsingLexer
 
-foreign import java unsafe "@field myPStatePtr" getMyPStatePtr :: Java EtaParsingLexer (StablePtr (IORef L.PState))
-foreign import java unsafe "@field myPStatePtr" setMyPStatePtr :: StablePtr (IORef L.PState) -> Java EtaParsingLexer ()
-
-foreign import java unsafe "@field done" getDone :: Java EtaParsingLexer Bool
-foreign import java unsafe "@field done" setDone :: Bool -> Java EtaParsingLexer ()
-
-foreign import java unsafe "@field myState" getMyState :: Java EtaParsingLexer Int
-foreign import java unsafe "@field myState" setMyState :: Int -> Java EtaParsingLexer ()
-
-foreign import java unsafe "@field myTokenStart" getMyTokenStart :: Java EtaParsingLexer Int
-foreign import java unsafe "@field myTokenStart" setMyTokenStart :: Int -> Java EtaParsingLexer ()
-
-foreign import java unsafe "@field myTokenEnd" getMyTokenEnd :: Java EtaParsingLexer Int
-foreign import java unsafe "@field myTokenEnd" setMyTokenEnd :: Int -> Java EtaParsingLexer ()
-
-foreign import java unsafe "@field myBuffer" getMyBuffer :: Java EtaParsingLexer CharSequence
-foreign import java unsafe "@field myBuffer" setMyBuffer :: CharSequence -> Java EtaParsingLexer ()
-
-foreign import java unsafe "@field myBufferEnd" getMyBufferEnd :: Java EtaParsingLexer Int
-foreign import java unsafe "@field myBufferEnd" setMyBufferEnd :: Int -> Java EtaParsingLexer ()
-
-foreign import java unsafe "@field myTokenType" getMyTokenType :: Java EtaParsingLexer IElementType
-foreign import java unsafe "@field myTokenType" setMyTokenType :: IElementType -> Java EtaParsingLexer ()
-
-foreign import java unsafe "@field myNextTokenType" getMyNextTokenType :: Java EtaParsingLexer IElementType
-foreign import java unsafe "@field myNextTokenType" setMyNextTokenType :: IElementType -> Java EtaParsingLexer ()
-
-foreign import java unsafe "@field myNextTokenStart" getMyNextTokenStart :: Java EtaParsingLexer Int
-foreign import java unsafe "@field myNextTokenStart" setMyNextTokenStart :: Int -> Java EtaParsingLexer ()
-
-foreign import java unsafe "@field myNextTokenEnd" getMyNextTokenEnd :: Java EtaParsingLexer Int
-foreign import java unsafe "@field myNextTokenEnd" setMyNextTokenEnd :: Int -> Java EtaParsingLexer ()
-
 foreign export java start :: CharSequence -> Int -> Int -> Int -> Java EtaParsingLexer ()
-start buf startOffset endOffset initialState = do
-  -- debugTokenStream pState
+start buf startOffset endOffset _initialState = do
+  debugTokenStream stringBuf srcLoc flags
   setMyPStatePtr =<< mkPtr
   -- For now, let's not use `initialState` so intellij has to start from the beginning.
   -- If intellij sees a state zero then it will assume it can always start the lexer over
@@ -199,7 +153,7 @@ advance = do
                   "Unexpected case, startOffset was " ++ show startOffset
                   ++ " and myTokenStart was " ++ show myTokenStart
 
-        L.PFailed srcSpan msgDoc -> do
+        L.PFailed _srcSpan _msgDoc -> do
           startOffset <- getMyTokenEnd
           endOffset <- getMyBufferEnd
           let iElementType = T.badCharacter
@@ -216,7 +170,6 @@ doDebugLexer = Unsafe.unsafePerformIO $ isJust <$> lookupEnv "DEBUG_LEXER"
 
 debugLexer :: Show a => a -> Java EtaParsingLexer ()
 debugLexer info = when doDebugLexer $ do
-  myState <- getMyState
   text <- getTokenText
   myTokenStart <- getMyTokenStart
   myTokenEnd <- getMyTokenEnd
