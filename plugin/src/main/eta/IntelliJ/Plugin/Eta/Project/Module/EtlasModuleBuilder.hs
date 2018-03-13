@@ -21,6 +21,7 @@ import           FFI.Com.IntelliJ.UI.TextAccessor (getText)
 import           FFI.Javax.Swing.JComponent
 
 import           IntelliJ.Plugin.Util.Wizard
+import           IntelliJ.Plugin.Util.GuiUtil
 
 data EtlasModuleBuilder = EtlasModuleBuilder
   @com.typelead.intellij.plugin.eta.project.module.EtlasModuleBuilder
@@ -101,6 +102,9 @@ newEtaStep moduleBuilder settingsStep = do
 
   mkModuleWizardStep MkModuleWizardStep {..}
   where
-  -- TODO: Need to GuiUtil.addFolderListener, locateExecutableByGuessing, etc.
+  -- TODO: Need to add locateExecutableByGuessing
   newPathField :: JString -> Java a TextFieldWithBrowseButton
-  newPathField _name = newTextFieldWithBrowseButton
+  newPathField name = do
+    textField <- newTextFieldWithBrowseButton
+    addFolderListener textField name
+    return textField

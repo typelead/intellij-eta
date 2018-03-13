@@ -28,7 +28,7 @@ public class FFIGen {
   private static Map<String, TypeEntry> typeMapping =
     new TypeMappingBuilder()
       .put("java.lang.String", "JString", "Java")
-      .put("boolean", "Bool", "Prelude")
+      .put("boolean", "Bool", "P.Base")
       .put("boolean[]", "JBooleanArray", "Java")
       .put("java.lang.Boolean", "JBoolean", "Java")
       .put("byte", "Byte", "Java")
@@ -40,16 +40,16 @@ public class FFIGen {
       .put("char", "JChar", "Java")
       .put("char[]", "JCharArray", "Java")
       .put("java.lang.Char", "JCharacter", "Java")
-      .put("int", "Int", "Prelude")
+      .put("int", "Int", "P.Base")
       .put("int[]", "JIntArray", "Java")
       .put("java.lang.Integer", "JInteger", "Java")
       .put("long", "Int64", "Data.Int")
       .put("long[]", "JLongArray", "Java")
       .put("java.lang.Long", "JLong", "Java")
-      .put("float", "Float", "Prelude")
+      .put("float", "Float", "P.Base")
       .put("float[]", "JFloatArray", "Java")
       .put("java.lang.Float", "JFloat", "Java")
-      .put("double", "Double", "Prelude")
+      .put("double", "Double", "P.Base")
       .put("double[]", "JDoubleArray", "Java")
       .put("java.lang.Double", "JDouble", "Java")
       .put("void", "()")
@@ -241,7 +241,10 @@ public class FFIGen {
       sb.append(etaName);
       sb.append("\n  :: ");
       argTypes.forEach(t -> sb.append(t).append(" -> "));
-      sb.append("Java " + etaDataName + " " + retType);
+      sb.append("Java ");
+      if (Modifier.isStatic(method.getModifiers())) sb.append("a");
+      else sb.append(etaDataName);
+      sb.append(" ").append(retType);
       return sb.toString();
     }
 
