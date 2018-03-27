@@ -9,6 +9,8 @@ import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.ModuleBuilder (addModul
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.ModuleWizardStep (ModuleWizardStep, ModuleWizardStepArray, updateDataModel)
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.SettingsStep (SettingsStep, addSettingsField)
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.WizardContext (WizardContext, isCreatingNewProject)
+import           FFI.Com.TypeLead.IntelliJ.Plugin.Cabal.Project.Module.CabalPackageSettingsStep (newCabalPackageSettingsStep)
+import           FFI.Com.TypeLead.IntelliJ.Plugin.Cabal.Project.Module.NewCabalProjectForm (newNewCabalProjectForm)
 import           FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Project.Module.EtlasModuleType (getEtlasModuleType)
 import qualified FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Settings.EtaBuildSettings as EtaBuildSettings
 import           FFI.Com.IntelliJ.OpenApi.Module.JavaModuleType (getJavaModuleType)
@@ -44,14 +46,12 @@ createWizardSteps
   -> ModulesProvider
   -> Java EtlasModuleBuilder ModuleWizardStepArray
 createWizardSteps wizardContext _modulesProvider = do
-  _isNewProj <- wizardContext <.> isCreatingNewProject
-  -- TODO
-  arrayFromList []
---   if isNewProj then do
---     this <- getThis
---     arrayFromList =<< sequence [newEtlasStep this wizardContext]
---   else
---     arrayFromList []
+  isNewProj <- wizardContext <.> isCreatingNewProject
+  if isNewProj then do
+    this <- getThis
+    arrayFromList =<< sequence [newEtlasStep this wizardContext]
+  else
+    arrayFromList []
 
 foreign export java modifySettingsStep
   :: SettingsStep
@@ -72,12 +72,10 @@ setupRootModel rootModel = do
       url <- contentEntry <.> getUrl
       contentEntry <.> addExcludeFolderStr (url <> "/dist")
 
--- TODO
--- newEtlasStep :: EtlasModuleBuilder -> WizardContext -> Java a ModuleWizardStep
--- newEtlasStep moduleBuilder wizardContext = mkModuleWizardStep MkModuleWizardStep {..}
---   where
---   mkModuleWizardStepUpdateDataModel = undefined
---   mkModuleWizardStepGetComponent = undefined
+newEtlasStep :: EtlasModuleBuilder -> WizardContext -> Java a ModuleWizardStep
+newEtlasStep moduleBuilder wizardContext = do
+  form <- newNewCabalProjectForm
+  superCastJ $ newCabalPackageSettingsStep (superCast moduleBuilder) wizardContext form
 
 newEtaStep :: EtlasModuleBuilder -> SettingsStep -> Java a ModuleWizardStep
 newEtaStep moduleBuilder settingsStep = do

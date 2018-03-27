@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec tail -f plugin/build/idea-sandbox/system/log/idea.log

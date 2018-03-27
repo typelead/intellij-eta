@@ -4,6 +4,8 @@ import com.typelead.intellij.plugin.cabal.project.template.CabalComponentType;
 import com.typelead.intellij.plugin.cabal.project.template.CabalFileData;
 
 import javax.swing.*;
+import java.awt.event.ItemEvent;
+import java.util.Arrays;
 
 public class NewCabalProjectForm {
 
@@ -19,6 +21,19 @@ public class NewCabalProjectForm {
   private JComboBox<String> componentType;
   private JTextField sourceDir;
   private JComboBox<String> language;
+
+  public NewCabalProjectForm() {
+    initializeCabalPackage.addItemListener(e -> {
+      final Boolean enable;
+      if (e.getStateChange() == ItemEvent.SELECTED) enable = true;
+      else if (e.getStateChange() == ItemEvent.DESELECTED) enable = false;
+      else enable = null;
+      if (enable == null) return;
+      Arrays.stream(contentPane.getComponents()).forEach(c -> {
+        if (c != initializeCabalPackage) c.setEnabled(enable);
+      });
+    });
+  }
 
   public JComponent getContentPane() {
     return contentPane;
