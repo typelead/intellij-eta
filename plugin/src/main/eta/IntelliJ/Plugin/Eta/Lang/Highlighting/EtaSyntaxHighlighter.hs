@@ -34,51 +34,51 @@ getTokenHighlights tokenType =
 {-# NOINLINE keys #-}
 keys :: Map IElementType TextAttributesKey
 keys = mkMap
-  [ standardKeywords =: kETA_RESERVED_ID
-  , reservedSymbols =: kETA_RESERVED_OP
-  , [jITobrack, jITcbrack] =: kETA_BRACKETS
-  , [jIToparen, jITcparen] =: kETA_PARENTHESES
-  , [jITocurly, jITccurly] =: kETA_BRACES
-  , [jITstring] =: kETA_STRING
-  , pragmas =: kETA_PRAGMA
-  , [jITcomma] =: kETA_COMMA
-  , [jITsemi] =: kETA_SEMICOLON
-  , [jITconid, jITqconid] =: kETA_CONID
-  , haddocks =: kETA_HADDOCK
-  , [jITinteger] =: kETA_INTEGER
-  , [jITrational] =: kETA_FLOAT
-  , [jITlineComment, jITblockComment] =: kETA_COMMENT
-  , [jITchar] =: kETA_CHAR
-  , [jITvarsym, jITqvarsym] =: kETA_VARSYM
-  , [jITconsym, jITqconsym] =: kETA_CONSYM
+  [ kETA_RESERVED_ID =: standardKeywords
+  , kETA_RESERVED_OP =: reservedSymbols
+  , kETA_BRACKETS    =: [jITobrack, jITcbrack]
+  , kETA_PARENTHESES =: [jIToparen, jITcparen]
+  , kETA_BRACES      =: [jITocurly, jITccurly]
+  , kETA_STRING      =: [jITstring]
+  , kETA_PRAGMA      =: pragmas
+  , kETA_COMMA       =: [jITcomma]
+  , kETA_SEMICOLON   =: [jITsemi]
+  , kETA_CONID       =: [jITconid, jITqconid]
+  , kETA_HADDOCK     =: haddocks
+  , kETA_INTEGER     =: [jITinteger]
+  , kETA_FLOAT       =: [jITrational]
+  , kETA_COMMENT     =: [jITlineComment, jITblockComment]
+  , kETA_CHAR        =: [jITchar]
+  , kETA_VARSYM      =: [jITvarsym, jITqvarsym]
+  , kETA_CONSYM      =: [jITconsym, jITqconsym]
   ]
   where
-  mkMap ks = M.fromList $ ks >>= \(ks', v) -> [(k, v) | k <- ks']
+  mkMap ks = M.fromList $ ks >>= \(v, ks') -> [(k, v) | k <- ks']
   (=:) = (,)
 
-kETA_RESERVED_ID = createTextAttributesKey "ETA_RESERVED_ID" kKEYWORD
-kETA_RESERVED_OP = createTextAttributesKey "ETA_RESERVED_OP" kPREDEFINED_SYMBOL
-kETA_COMMA = createTextAttributesKey "ETA_COMMA" kCOMMA
-kETA_SEMICOLON = createTextAttributesKey "ETA_SEMICOLON" kSEMICOLON
-kETA_BRACKETS = createTextAttributesKey "ETA_BRACKETS" kBRACKETS
-kETA_PARENTHESES = createTextAttributesKey "ETA_PARENTHESES" kPARENTHESES
-kETA_BRACES = createTextAttributesKey "ETA_BRACES" kBRACES
+kETA_RESERVED_ID    = createTextAttributesKey "ETA_RESERVED_ID"    kKEYWORD
+kETA_RESERVED_OP    = createTextAttributesKey "ETA_RESERVED_OP"    kPREDEFINED_SYMBOL
+kETA_COMMA          = createTextAttributesKey "ETA_COMMA"          kCOMMA
+kETA_SEMICOLON      = createTextAttributesKey "ETA_SEMICOLON"      kSEMICOLON
+kETA_BRACKETS       = createTextAttributesKey "ETA_BRACKETS"       kBRACKETS
+kETA_PARENTHESES    = createTextAttributesKey "ETA_PARENTHESES"    kPARENTHESES
+kETA_BRACES         = createTextAttributesKey "ETA_BRACES"         kBRACES
 kETA_NESTED_COMMENT = createTextAttributesKey "ETA_NESTED_COMMENT" kBLOCK_COMMENT
-kETA_HADDOCK = createTextAttributesKey "ETA_HADDOCK" kDOC_COMMENT
-kETA_COMMENT = createTextAttributesKey "ETA_COMMENT" kLINE_COMMENT
-kETA_INTEGER = createTextAttributesKey "ETA_INTEGER" kNUMBER
-kETA_FLOAT = createTextAttributesKey "ETA_FLOAT" kNUMBER
-kETA_CHAR = createTextAttributesKey "ETA_CHAR" kNUMBER
-kETA_CONID = createTextAttributesKey "ETA_CONID" kINSTANCE_FIELD
-kETA_VARID = createTextAttributesKey "ETA_VARID" kFUNCTION_CALL
-kETA_PARAMETER = createTextAttributesKey "ETA_PARAMETER" kPARAMETER
-kETA_INFIXVARID = createTextAttributesKey "ETA_INFIXVARID" kFUNCTION_CALL
-kETA_VARSYM = createTextAttributesKey "ETA_VARSYM" kOPERATION_SIGN
-kETA_CONSYM = createTextAttributesKey "ETA_CONSYM" kPREDEFINED_SYMBOL
-kETA_PRAGMA = createTextAttributesKey "ETA_PRAGMA" kMETADATA
-kETA_STRING = createTextAttributesKey "ETA_STRING" kSTRING
-kETA_QUASIQUOTE = createTextAttributesKey "ETA_QUASIQUOTE" kSTRING
-kETA_ESCAPE = createTextAttributesKey "ETA_ESCAPE" kVALID_STRING_ESCAPE
+kETA_HADDOCK        = createTextAttributesKey "ETA_HADDOCK"        kDOC_COMMENT
+kETA_COMMENT        = createTextAttributesKey "ETA_COMMENT"        kLINE_COMMENT
+kETA_INTEGER        = createTextAttributesKey "ETA_INTEGER"        kNUMBER
+kETA_FLOAT          = createTextAttributesKey "ETA_FLOAT"          kNUMBER
+kETA_CHAR           = createTextAttributesKey "ETA_CHAR"           kNUMBER
+kETA_CONID          = createTextAttributesKey "ETA_CONID"          kINSTANCE_FIELD
+kETA_VARID          = createTextAttributesKey "ETA_VARID"          kFUNCTION_CALL
+kETA_PARAMETER      = createTextAttributesKey "ETA_PARAMETER"      kPARAMETER
+kETA_INFIXVARID     = createTextAttributesKey "ETA_INFIXVARID"     kFUNCTION_CALL
+kETA_VARSYM         = createTextAttributesKey "ETA_VARSYM"         kOPERATION_SIGN
+kETA_CONSYM         = createTextAttributesKey "ETA_CONSYM"         kPREDEFINED_SYMBOL
+kETA_PRAGMA         = createTextAttributesKey "ETA_PRAGMA"         kMETADATA
+kETA_STRING         = createTextAttributesKey "ETA_STRING"         kSTRING
+kETA_QUASIQUOTE     = createTextAttributesKey "ETA_QUASIQUOTE"     kSTRING
+kETA_ESCAPE         = createTextAttributesKey "ETA_ESCAPE"         kVALID_STRING_ESCAPE
 
 standardKeywords =
   [ jITas
