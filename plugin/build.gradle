@@ -32,6 +32,32 @@ dependencies {
 
 compileJava.dependsOn(runJFlex)
 
+compileEta {
+  options {
+    args = ['-Werror','-Wall','-fno-warn-orphans',
+            '-fno-warn-missing-signatures','-fno-warn-unused-binds']
+    extensions {
+      DataKinds
+      ExistentialQuantification
+      FlexibleContexts
+      FlexibleInstances
+      FunctionalDependencies
+      GeneralizedNewtypeDeriving
+      LambdaCase
+      MagicHash
+      MultiParamTypeClasses
+      NoImplicitPrelude
+      OverloadedStrings
+      RankNTypes
+      RecordWildCards
+      ScopedTypeVariables
+      TypeFamilies
+      TypeOperators
+      UnboxedTuples
+    }
+  }
+}
+
 clean.dependsOn(cleanJFlex)
 
 prepareSandbox {
