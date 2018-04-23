@@ -1,0 +1,35 @@
+apply plugin: 'application'
+apply plugin: 'org.jetbrains.intellij'
+
+mainClassName = 'com.typelead.intellij.utils.FFIGen'
+
+dependencies {
+  // compile runIde.getClasspath()
+  compile project(':plugin')
+}
+
+run {
+  systemProperties = System.properties
+}
+
+// import org.gradle.internal.jvm.Jvm
+
+// def getIdeaRuntimeClasspath() {
+//   def cp = project.files()
+//   def ideaDirectory = runIde.ideaDirectory
+//   def toolsJar = Jvm.current().toolsJar
+//   if (toolsJar != null) cp += project.files(toolsJar)
+//   cp += project.files(
+//     "$ideaDirectory/lib/idea_rt.jar",
+//     "$ideaDirectory/lib/idea.jar",
+//     "$ideaDirectory/lib/bootstrap.jar",
+//     "$ideaDirectory/lib/extensions.jar",
+//     "$ideaDirectory/lib/util.jar",
+//     "$ideaDirectory/lib/openapi.jar",
+//     "$ideaDirectory/lib/trove4j.jar",
+//     "$ideaDirectory/lib/jdom.jar",
+//     "$ideaDirectory/lib/log4j.jar"
+//   )
+//   cp
+// }
+

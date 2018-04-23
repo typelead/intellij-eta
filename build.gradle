@@ -1,188 +1,30 @@
-import org.gradle.internal.jvm.Jvm
-
-import java.util.function.BiConsumer
-
 plugins {
-  id 'com.typelead.eta' version '0.5.7'
-  id "org.jetbrains.intellij" version "0.3.1"
+  id 'com.typelead.eta' version '0.6.0' apply false
+  id 'org.jetbrains.intellij' version '0.3.1' apply false
 }
 
-version = file('version.txt').text.trim()
+apply plugin: 'eta-base'
+
+eta {
+  version = '0.7.2b1'
+  etlasVersion = '1.3.0.0'
+  preInstallDependencies = true
+}
 
 group 'com.typelead'
+version = file('version.txt').text.trim()
 
 ext {
   javaVersion = '1.8'
 }
 
-task runJFlex(type: Exec) {
-  commandLine './tools/run-jflex'
-}
-
-task cleanJFlex(type: Exec) {
-  commandLine './tools/run-jflex', 'clean'
-}
-
-allprojects {
+subprojects {
 
   apply plugin: 'java'
-  apply plugin: 'org.jetbrains.intellij'
 
   repositories {
     mavenCentral()
   }
 
-  configurations {
-    provided
-    compile.extendsFrom provided
-  }
-
-  intellij {
-    version = '2017.3'
-    pluginName = 'IntelliJ-Eta'
-    // Makes it easy to support multiple intellij versions.
-    // If we want to set this to true, we should find a way to cross build
-    // against multiple intellij versions.
-    updateSinceUntilBuild = false
-  }
-
   sourceCompatibility = 1.8
-}
-
-project(':plugin') {
-
-  apply plugin: 'eta'
-
-  eta {
-    useSystemEta   = true
-    useSystemEtlas = true
-  }
-
-  sourceSets {
-    main {
-      eta {
-        srcDir 'src/main/eta'
-      }
-    }
-    test {
-      eta {
-        srcDir 'src/test/eta'
-      }
-    }
-  }
-
-  dependencies {
-    compile project(':eta-parser')
-    compile project(':jps-shared')
-    compile project(':jps-plugin')
-    compile eta('base:[4.8,4.9[')
-    compile eta('containers:0.5.10.+')
-    compile eta('eta-java-interop:0.1.3.+')
-
-    // TODO: I assume this won't work
-    testCompile fileTree(dir: "${project.buildDir}/etlas/dist/build", include: 'HSintellij-eta-*.jar')
-  }
-
-  compileJava.dependsOn(runJFlex)
-
-  clean.dependsOn(cleanJFlex)
-
-  compileTestJava.dependsOn(compileEta)
-
-  // TODO: Is this needed?
-  // testCompileEta.dependsOn(compileTestJava)
-
-  prepareSandbox {
-    doLast {
-      copyEtaRuntimeToPluginSandbox(project, false)
-    }
-  }
-
-  prepareSandbox.dependsOn(compileEta)
-
-  prepareTestingSandbox {
-    doLast {
-      copyEtaRuntimeToPluginSandbox(project, true)
-    }
-  }
-
-  //TODO: We probably do need this
-  //prepareTestingSandbox.dependsOn(testCompileEta)
-
-  // Hack to trick junit into thinking we have java tests.
-  //TODO
-  //testClasses {
-  //  dependsOn testCompileEta
-  //  doLast {
-  //    copy {
-  //      from zipTree("${project.buildDir}/etlas/dist/build/test/test.jar")
-  //      into "${project.buildDir}/classes/test"
-  //    }
-  //  }
-  //}
-
-  //TODO
-  //testClasses.dependsOn(testCompileEta)
-}
-
-project(':jps-plugin') {
-  dependencies {
-    compile project(':jps-shared')
-  }
-}
-
-static def getSandboxLibDir(Project project, Boolean test) {
-  def pluginsDir = test ? "plugins-test" : "plugins"
-  "${project.intellij.sandboxDirectory}/$pluginsDir/${project.intellij.pluginName}/lib/"
-}
-
-def copyEtaRuntimeToPluginSandbox(Project project, Boolean test) {
-  def dest = getSandboxLibDir(project, test)
-  configurations.runtime.files.forEach { dep ->
-    project.copy {
-      from dep.canonicalPath
-      into dest
-    }
-  }
-}
-
-task ffigenConfigure {
-  doLast {
-    // Forward property arguments
-    System.properties.forEach(new BiConsumer<String, String>() {
-      void accept(String k, String v) {
-        ffigen.jvmArgs += "-D$k=$v"
-      }
-    })
-
-    ffigen.classpath += getIdeaRuntimeClasspath()
-    ffigen.classpath += project(':ffigen').sourceSets.main.runtimeClasspath
-    ffigen.classpath += project(':plugin').sourceSets.main.runtimeClasspath
-  }
-}
-
-task ffigen(type: JavaExec) {
-  main = 'com.typelead.intellij.utils.FFIGen'
-}
-
-ffigen.dependsOn(':ffigen:compileJava', ffigenConfigure)
-
-// Adapted from org.jetbrains.intellij.tasks.RunIdeaTask#configureClasspath
-FileCollection getIdeaRuntimeClasspath() {
-  FileCollection cp = project.files()
-  File ideaDirectory = runIde.ideaDirectory
-  def toolsJar = Jvm.current().toolsJar
-  if (toolsJar != null) cp += project.files(toolsJar)
-  cp += project.files(
-    "$ideaDirectory/lib/idea_rt.jar",
-    "$ideaDirectory/lib/idea.jar",
-    "$ideaDirectory/lib/bootstrap.jar",
-    "$ideaDirectory/lib/extensions.jar",
-    "$ideaDirectory/lib/util.jar",
-    "$ideaDirectory/lib/openapi.jar",
-    "$ideaDirectory/lib/trove4j.jar",
-    "$ideaDirectory/lib/jdom.jar",
-    "$ideaDirectory/lib/log4j.jar"
-  )
-  cp
 }
