@@ -1,4 +1,4 @@
-module FFI.Com.IntelliJ.IDE.Util.ImportProject.ProjectDescriptor where
+module FFI.Com.IntelliJ.Ide.Util.ImportProject.ProjectDescriptor where
 
 import P
 

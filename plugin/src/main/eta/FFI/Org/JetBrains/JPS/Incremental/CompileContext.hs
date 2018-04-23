@@ -5,7 +5,7 @@ module FFI.Org.JetBrains.JPS.Incremental.CompileContext
 
 import P
 import FFI.Org.JetBrains.JPS.Incremental.MessageHandler
-import FFI.Com.IntelliJ.IDE.Util.ImportProject.ProjectDescriptor
+import FFI.Com.IntelliJ.Ide.Util.ImportProject.ProjectDescriptor
 import FFI.Com.IntelliJ.OpenApi.Util.UserDataHandler
 
 -- Start org.jetbrains.jps.incremental.CompileContext
