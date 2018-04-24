@@ -483,6 +483,9 @@ foreign import java unsafe
 foreign import java unsafe
   "@static @field com.typelead.intellij.plugin.eta.lang.psi.EtaTokenTypes.ITblockComment"
   jITblockComment :: IElementType
+foreign import java unsafe
+  "@static @field com.typelead.intellij.plugin.eta.lang.psi.EtaTokenTypes.ITjavaannot"
+  jITjavaannot :: IElementType
 
 tokenToIElementType :: Token -> IElementType
 tokenToIElementType t = case t of
@@ -646,3 +649,4 @@ tokenToIElementType t = case t of
   ITdocOptionsOld _ -> jITdocOptionsOld
   ITlineComment _ -> jITlineComment
   ITblockComment _ -> jITblockComment
+  ITjavaannot _ -> jITjavaannot

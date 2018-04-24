@@ -189,4 +189,7 @@ public interface EtaTokenTypes {
   IElementType ITdocOptionsOld = new EtaTokenType("ITdocOptionsOld"); // String -- doc options declared "-- # ..."-style
   IElementType ITlineComment = new EtaTokenType("ITlineComment"); // String -- comment starting by "--"
   IElementType ITblockComment = new EtaTokenType("ITblockComment"); // String -- comment in {- -}
+
+  // Java annotations
+  IElementType ITjavaannot = new EtaTokenType("ITjavaannot"); // FastString
 }
