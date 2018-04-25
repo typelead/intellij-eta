@@ -3,7 +3,8 @@ module JUnit.Runner.Result where
 import P
 import JUnit.Runner.Notification.Failure
 
-data {-# CLASS "org.junit.runner.Result" #-} Result = Result (Object# Result)
+data Result = Result
+  @org.junit.runner.Result
   deriving Class
 
 foreign import java unsafe "wasSuccessful" wasSuccessful

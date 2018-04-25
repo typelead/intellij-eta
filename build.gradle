@@ -1,266 +1,30 @@
-import com.typelead.gradle.utils.EtaRuntimeUtils
-import org.gradle.internal.jvm.Jvm
-
-import java.util.function.BiConsumer
-
-// Depend on local gradle-eta plugin.
-buildscript {
-  repositories {
-    mavenLocal()
-
-    dependencies {
-      classpath 'com.typelead:gradle-eta:0.0.1-SNAPSHOT-fd00812'
-    }
-  }
-}
-
 plugins {
-  id "org.jetbrains.intellij" version "0.2.17"
+  id 'com.typelead.eta' version '0.6.0' apply false
+  id 'org.jetbrains.intellij' version '0.3.1' apply false
 }
 
-version = file('version.txt').text.trim()
+apply plugin: 'eta-base'
+
+eta {
+  version = '0.7.2b1'
+  etlasVersion = '1.3.0.0'
+  preInstallDependencies = true
+}
 
 group 'com.typelead'
+version = file('version.txt').text.trim()
 
 ext {
   javaVersion = '1.8'
 }
 
-task runJFlex(type: Exec) {
-  commandLine './tools/run-jflex'
-}
-
-task cleanJFlex(type: Exec) {
-  commandLine './tools/run-jflex', 'clean'
-}
-
-allprojects {
+subprojects {
 
   apply plugin: 'java'
-  apply plugin: 'org.jetbrains.intellij'
 
   repositories {
     mavenCentral()
   }
 
-  configurations {
-    provided
-    compile.extendsFrom provided
-  }
-
-  intellij {
-    version = '2017.3'
-    pluginName = 'IntelliJ-Eta'
-    // Makes it easy to support multiple intellij versions.
-    // If we want to set this to true, we should find a way to cross build
-    // against multiple intellij versions.
-    updateSinceUntilBuild = false
-  }
-
   sourceCompatibility = 1.8
-}
-
-task cleanEtaParserSources(type: Exec) {
-  workingDir file('eta-parser')
-  commandLine = ['make', 'clean']
-}
-
-clean.dependsOn(cleanEtaParserSources)
-
-task makeEtaParserSources(type: Exec) {
-  workingDir file('eta-parser')
-  commandLine = ['make', 'hpack', 'sources']
-  ['eta', 'java', 'patches', 'tools'].each { inputs.dir(it) }
-  ['eta-parser.cabal', 'Makefile'].each { inputs.file(it) }
-}
-
-project(':plugin') {
-
-  apply plugin: 'eta'
-
-  eta {
-    useSystemEtlas = true
-  }
-
-  task hpack(type: Exec) {
-    commandLine 'hpack'
-  }
-
-  cleanEta.dependsOn(hpack)
-
-  sandboxAddSourcesEta {
-    sources = ['../eta-parser']
-    // TODO: This helps with incremental compilation but isn't perfect
-    // Use `touch` on these files to get this task to rerun.
-    inputs.files('../eta-parser/eta-parser.cabal')
-    outputs.files('../.cabal-sandbox/add-source-timestamps')
-  }
-
-  installDepsEta.dependsOn(hpack, makeEtaParserSources)
-
-  [installDepsEta, installTestDepsEta].forEach {
-    it.inputs.files('package.yaml')
-    it.outputs.dir('.cabal-sandbox/lib')
-  }
-
-  dependencies {
-    compile project(':jps-shared')
-    compile project(':jps-plugin')
-    testCompile fileTree(dir: "${project.buildDir}/etlas/dist/build", include: 'HSintellij-eta-*.jar')
-  }
-
-  compileJava.dependsOn(runJFlex)
-
-  clean.dependsOn(cleanJFlex)
-
-  compileTestJava.dependsOn(compileEta)
-
-  testCompileEta {
-    inputs.files('src/test/eta')
-    outputs.files("${project.buildDir}/etlas/dist/build/test/test.jar")
-  }
-
-  testCompileEta.dependsOn(compileTestJava)
-
-  prepareSandbox {
-    doLast {
-      copyEtaRuntimeToPluginSandbox(project, false)
-    }
-  }
-
-  prepareSandbox.dependsOn(compileEta)
-
-  prepareTestingSandbox {
-    doLast {
-      copyEtaRuntimeToPluginSandbox(project, true)
-    }
-  }
-
-  prepareTestingSandbox.dependsOn(testCompileEta)
-
-  // Hack to trick junit into thinking we have java tests.
-  testClasses {
-    dependsOn testCompileEta
-    doLast {
-      copy {
-        from zipTree("${project.buildDir}/etlas/dist/build/test/test.jar")
-        into "${project.buildDir}/classes/test"
-      }
-    }
-  }
-
-  testClasses.dependsOn(testCompileEta)
-
-  task configureTest {
-    dependsOn testCompileEta
-    doLast {
-      test.classpath += files(getEtaRuntimeClasspath(project))
-    }
-  }
-
-  test {
-    dependsOn configureTest
-  }
-}
-
-project(':jps-plugin') {
-  dependencies {
-    compile project(':jps-shared')
-  }
-}
-
-static def getSandboxLibDir(Project project, Boolean test) {
-  def pluginsDir = test ? "plugins-test" : "plugins"
-  "${project.intellij.sandboxDirectory}/$pluginsDir/${project.intellij.pluginName}/lib/"
-}
-
-static Set<File> getEtaRuntimeClasspath(Project project) {
-  if (project.eta.etlasBinary == null) {
-    throw new GradleException(
-      "Cannot getEtaRuntimeClasspath, eta.etlasBinary is null; "
-      + "consider running in a doLast { .. } block instead."
-    )
-  }
-  def component = "lib:intellij-eta"
-  // Attempt at caching the runtime, later we can build this into gradle-eta (using ~/.gradle/caches)
-  def useCache = true
-  if (useCache) {
-    File cachedRuntimeFile = new File(project.buildDir, "etlas/runtime/$component")
-    if (!cachedRuntimeFile.exists()
-      || cachedRuntimeFile.lastModified() < new File(project.projectDir, 'package.yaml').lastModified()) {
-      if (cachedRuntimeFile.exists()) {
-        cachedRuntimeFile.write('')
-      } else {
-        cachedRuntimeFile.getParentFile().mkdirs()
-      }
-      project.logger.info("Requesting eta runtime classpath...")
-      def res = EtaRuntimeUtils.getRuntimeClasspath(project, project.eta, component)
-      project.logger.info("Using eta runtime classpath: $res")
-      res.each { cachedRuntimeFile.append(it.path + '\n') }
-      res
-    } else {
-      Set<File> res = new HashSet<File>()
-      //noinspection GroovyMissingReturnStatement
-      cachedRuntimeFile.eachLine {
-        if (!it.isEmpty()) res.add(new File(it))
-      }
-      project.logger.info("Using cached eta runtime classpath: $res")
-      res
-    }
-  } else {
-    def res = EtaRuntimeUtils.getRuntimeClasspath(project, project.eta, component)
-    project.logger.info("Using eta runtime classpath: $res")
-    res
-  }
-}
-
-def copyEtaRuntimeToPluginSandbox(Project project, Boolean test) {
-  def dest = getSandboxLibDir(project, test)
-  getEtaRuntimeClasspath(project).forEach { dep ->
-    project.copy {
-      from dep.canonicalPath
-      into dest
-    }
-  }
-}
-
-task ffigenConfigure {
-  doLast {
-    // Forward property arguments
-    System.properties.forEach(new BiConsumer<String, String>() {
-      void accept(String k, String v) {
-        ffigen.jvmArgs += "-D$k=$v"
-      }
-    })
-
-    ffigen.classpath += getIdeaRuntimeClasspath()
-    ffigen.classpath += project(':ffigen').sourceSets.main.runtimeClasspath
-    ffigen.classpath += project(':plugin').sourceSets.main.runtimeClasspath
-  }
-}
-
-task ffigen(type: JavaExec) {
-  main = 'com.typelead.intellij.utils.FFIGen'
-}
-
-ffigen.dependsOn(':ffigen:compileJava', ffigenConfigure)
-
-// Adapted from org.jetbrains.intellij.tasks.RunIdeaTask#configureClasspath
-FileCollection getIdeaRuntimeClasspath() {
-  FileCollection cp = project.files()
-  File ideaDirectory = runIde.ideaDirectory
-  def toolsJar = Jvm.current().toolsJar
-  if (toolsJar != null) cp += project.files(toolsJar)
-  cp += project.files(
-    "$ideaDirectory/lib/idea_rt.jar",
-    "$ideaDirectory/lib/idea.jar",
-    "$ideaDirectory/lib/bootstrap.jar",
-    "$ideaDirectory/lib/extensions.jar",
-    "$ideaDirectory/lib/util.jar",
-    "$ideaDirectory/lib/openapi.jar",
-    "$ideaDirectory/lib/trove4j.jar",
-    "$ideaDirectory/lib/jdom.jar",
-    "$ideaDirectory/lib/log4j.jar"
-  )
-  cp
 }

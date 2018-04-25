@@ -1,0 +1,65 @@
+apply plugin: 'eta'
+apply plugin: 'org.jetbrains.intellij'
+
+intellij {
+  version = '2017.3'
+  pluginName = 'IntelliJ-Eta'
+  // Makes it easy to support multiple intellij versions.
+  // If we want to set this to true, we should find a way to cross build
+  // against multiple intellij versions.
+  updateSinceUntilBuild = false
+}
+
+task runJFlex(type: Exec) {
+  commandLine '../tools/run-jflex'
+}
+
+task cleanJFlex(type: Exec) {
+  commandLine '../tools/run-jflex', 'clean'
+}
+
+dependencies {
+  compile project(':eta-parser')
+  compile project(':jps-shared')
+  compile project(':jps-plugin')
+  compile eta('base:[4.8,4.9[')
+  compile eta('containers:0.5.10.+')
+  compile eta('eta-java-interop:0.1.3.+')
+}
+
+compileJava.dependsOn(runJFlex)
+
+[compileEta, compileTestEta].each {
+  it.options {
+    args = ['-Werror','-Wall','-fno-warn-orphans',
+            '-fno-warn-missing-signatures','-fno-warn-unused-binds']
+    extensions {
+      DataKinds
+      ExistentialQuantification
+      FlexibleContexts
+      FlexibleInstances
+      FunctionalDependencies
+      GeneralizedNewtypeDeriving
+      LambdaCase
+      MagicHash
+      MultiParamTypeClasses
+      NoImplicitPrelude
+      OverloadedStrings
+      RankNTypes
+      RecordWildCards
+      ScopedTypeVariables
+      TypeFamilies
+      TypeOperators
+      UnboxedTuples
+    }
+  }
+}
+
+clean.dependsOn(cleanJFlex)
+
+prepareSandbox.dependsOn(compileEta)
+
+static def getSandboxLibDir(Project project, Boolean test) {
+  def pluginsDir = test ? "plugins-test" : "plugins"
+  "${project.intellij.sandboxDirectory}/$pluginsDir/${project.intellij.pluginName}/lib/"
+}
