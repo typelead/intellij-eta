@@ -25,15 +25,12 @@ dependencies {
   compile eta('base:[4.8,4.9[')
   compile eta('containers:0.5.10.+')
   compile eta('eta-java-interop:0.1.3.+')
-
-  // TODO: I assume this won't work
-  // testCompile fileTree(dir: "${project.buildDir}/etlas/dist/build", include: 'HSintellij-eta-*.jar')
 }
 
 compileJava.dependsOn(runJFlex)
 
-compileEta {
-  options {
+[compileEta, compileTestEta].each {
+  it.options {
     args = ['-Werror','-Wall','-fno-warn-orphans',
             '-fno-warn-missing-signatures','-fno-warn-unused-binds']
     extensions {
@@ -60,50 +57,9 @@ compileEta {
 
 clean.dependsOn(cleanJFlex)
 
-prepareSandbox {
-  doLast {
-    copyEtaRuntimeToPluginSandbox(project, false)
-  }
-}
-
 prepareSandbox.dependsOn(compileEta)
-
-prepareTestingSandbox {
-  doLast {
-    copyEtaRuntimeToPluginSandbox(project, true)
-  }
-}
 
 static def getSandboxLibDir(Project project, Boolean test) {
   def pluginsDir = test ? "plugins-test" : "plugins"
   "${project.intellij.sandboxDirectory}/$pluginsDir/${project.intellij.pluginName}/lib/"
 }
-
-def copyEtaRuntimeToPluginSandbox(Project project, Boolean test) {
-  def dest = getSandboxLibDir(project, test)
-  configurations.runtime.files.forEach { dep ->
-    project.copy {
-      from dep.canonicalPath
-      into dest
-    }
-  }
-}
-
-//TODO: We probably do need this
-//prepareTestingSandbox.dependsOn(testCompileEta)
-
-// Hack to trick junit into thinking we have java tests.
-//TODO
-//testClasses {
-//  dependsOn testCompileEta
-//  doLast {
-//    copy {
-//      from zipTree("${project.buildDir}/etlas/dist/build/test/test.jar")
-//      into "${project.buildDir}/classes/test"
-//    }
-//  }
-//}
-
-//TODO
-//testClasses.dependsOn(testCompileEta)
-

@@ -2,7 +2,6 @@ module JUnit.Runner.Notification.Failure where
 
 import P
 
-data {-# CLASS "org.junit.runner.notification.Failure" #-} Failure
-  = Failure (Object# Failure)
+data Failure = Failure
+  @org.junit.runner.notification.Failure
   deriving Class
-
