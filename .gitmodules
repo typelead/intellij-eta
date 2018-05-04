@@ -1,3 +1,6 @@
 [submodule "eta-parser"]
 	path = eta-parser
 	url = https://github.com/typelead/eta-parser
+[submodule "core"]
+	path = core
+	url = git@github.com:carymrobbins/intellij-haskforce-core.git

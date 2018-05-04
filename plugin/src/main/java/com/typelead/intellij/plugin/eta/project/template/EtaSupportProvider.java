@@ -6,6 +6,7 @@ import com.intellij.framework.addSupport.FrameworkSupportInModuleProvider;
 import com.intellij.ide.util.frameworkSupport.FrameworkSupportModel;
 import com.intellij.openapi.module.ModuleType;
 import com.intellij.openapi.module.ModuleTypeId;
+import com.typelead.intellij.plugin.eta.lang.EtaModuleSupportUtil;
 import com.typelead.intellij.plugin.eta.resources.EtaIcons;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +33,6 @@ public class EtaSupportProvider extends FrameworkSupportInModuleProvider {
 
   @Override
   public boolean isEnabledForModuleType(@NotNull ModuleType moduleType) {
-    String id = moduleType.getId();
-    return ModuleTypeId.JAVA_MODULE.equals(id) || "PLUGIN_MODULE".equals(id);
+    return EtaModuleSupportUtil.isSuitableEtaModuleType(moduleType);
   }
 }

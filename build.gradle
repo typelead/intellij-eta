@@ -11,6 +11,7 @@ eta {
   preInstallDependencies = true
 }
 
+
 group 'com.typelead'
 version = file('version.txt').text.trim()
 

@@ -23,7 +23,6 @@ public final class EtaFile extends PsiFileBase {
         return EtaFileType.INSTANCE;
     }
 
-    @Nullable
     @Override
     public Icon getIcon(int flags) {
         return EtaIcons.FILE;
