@@ -19,6 +19,7 @@ ext {
   javaVersion = '1.8'
 }
 
+
 subprojects {
 
   apply plugin: 'java'
@@ -28,4 +29,16 @@ subprojects {
   }
 
   sourceCompatibility = 1.8
+}
+
+[project(':jps-shared'), project(':plugin')].each { p ->
+  p.apply plugin: 'org.jetbrains.intellij'
+  p.intellij {
+    version = '2017.3'
+    pluginName = 'IntelliJ-Eta'
+    // Makes it easy to support multiple intellij versions.
+    // If we want to set this to true, we should find a way to cross build
+    // against multiple intellij versions.
+    updateSinceUntilBuild = false
+  }
 }
