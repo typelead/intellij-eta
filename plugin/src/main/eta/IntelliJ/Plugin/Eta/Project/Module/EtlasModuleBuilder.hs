@@ -4,7 +4,6 @@ import P
 
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.EmptyModuleBuilder (EmptyModuleBuilder)
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.JavaModuleBuilder (JavaModuleBuilder)
-import qualified FFI.Com.IntelliJ.Ide.Util.ProjectWizard.JavaModuleBuilder as JavaModuleBuilder
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.ModuleBuilder (addModuleConfigurationUpdater)
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.ModuleWizardStep (ModuleWizardStep, ModuleWizardStepArray, updateDataModel)
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.SettingsStep (SettingsStep, addSettingsField)
@@ -30,6 +29,9 @@ data EtlasModuleBuilder = EtlasModuleBuilder
 type instance Inherits EtlasModuleBuilder = '[JavaModuleBuilder]
 
 foreign import java unsafe "@new" newEtlasModuleBuilder :: Java a EtlasModuleBuilder
+
+foreign export java "@super setupRootModel" superSetupRootModel
+  :: ModifiableRootModel -> Java EtlasModuleBuilder ()
 
 foreign export java getModuleType
   :: Java EtlasModuleBuilder (ModuleType EmptyModuleBuilder)
@@ -62,8 +64,7 @@ modifySettingsStep settingsStep = do
 
 foreign export java setupRootModel :: ModifiableRootModel -> Java EtlasModuleBuilder ()
 setupRootModel rootModel = do
-  this <- getThis
-  (superCast this) <.> JavaModuleBuilder.setupRootModel rootModel
+  superSetupRootModel rootModel
   addExcludedRoots
   where
   addExcludedRoots = do
