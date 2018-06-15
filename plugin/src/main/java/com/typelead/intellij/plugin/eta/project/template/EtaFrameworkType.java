@@ -16,7 +16,7 @@ public class EtaFrameworkType extends FrameworkTypeEx {
   private static EtaFrameworkType _instance = null;
 
   public static EtaFrameworkType getInstance() {
-    if (_instance == null) _instance = FrameworkTypeEx.EP_NAME.findExtension(EtaFrameworkType.class);
+    if (_instance == null) _instance = EP_NAME.findExtension(EtaFrameworkType.class);
     return _instance;
   }
 

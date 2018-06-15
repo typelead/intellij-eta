@@ -1,4 +1,7 @@
-module IntelliJ.Plugin.Eta.Lang.Highlighting.EtaSyntaxHighlighterFactory where
+module IntelliJ.Plugin.Eta.Lang.Highlighting.EtaSyntaxHighlighterFactory
+  ( EtaSyntaxHighlighterFactory(..)
+  , getSyntaxHighlighter
+  ) where
 
 import P
 
@@ -19,4 +22,3 @@ foreign export java getSyntaxHighlighter
   -> VirtualFile
   -> Java EtaSyntaxHighlighterFactory SyntaxHighlighter
 getSyntaxHighlighter _ _ = superCastJ newEtaSyntaxHighlighter
-

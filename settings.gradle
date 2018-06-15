@@ -1,3 +1,3 @@
 rootProject.name = 'intellij-eta'
 
-include 'eta-parser', 'plugin', 'jps-shared', 'jps-plugin', 'ffigen'
+include 'core', 'eta-parser', 'plugin', 'jps-shared', 'jps-plugin'

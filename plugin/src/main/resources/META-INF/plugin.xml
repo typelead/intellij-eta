@@ -7,7 +7,6 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <framework.type implementation="com.typelead.intellij.plugin.eta.project.template.EtaFrameworkType"/>
-    <fileTypeFactory implementation="com.typelead.intellij.plugin.eta.lang.psi.EtaFileTypeFactory"/>
     <lang.syntaxHighlighterFactory
       language="Eta"
       implementationClass="com.typelead.intellij.plugin.eta.lang.highlighting.EtaSyntaxHighlighterFactory"
@@ -19,5 +18,17 @@
     <projectTemplatesFactory
       implementation="com.typelead.intellij.plugin.eta.project.template.EtaProjectTemplatesFactory"
     />
+    <lang.substitutor
+      language="Haskell"
+      implementationClass="com.typelead.intellij.plugin.eta.lang.psi.EtaLanguageSubstitutor"
+    />
+    <fileTypeFactory implementation="com.haskforce.HaskellFileTypeFactory"/>
+    <facetType implementation="com.typelead.intellij.plugin.eta.lang.EtaFacetType"/>
   </extensions>
+
+  <application-components>
+    <component>
+      <implementation-class>com.typelead.intellij.plugin.eta.IntelliJEtaPluginVerifier</implementation-class>
+    </component>
+  </application-components>
 </idea-plugin>
