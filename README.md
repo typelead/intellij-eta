@@ -5,7 +5,7 @@ The IntelliJ IDEA plugin for the Eta programming language
 ## Building
 
 ```
-% ./gradlew assemble
+% ./gradlew :plugin:assemble
 ```
 
 ## Running
@@ -13,11 +13,14 @@ The IntelliJ IDEA plugin for the Eta programming language
 You can run a sandboxed version of the plugin with:
 
 ```
-./gradlew runIde
+./gradlew :plugin:runIde
 ```
+
+You can supply the `-DETAJ_DEV=1` property to have the sandboxed IDE run
+with the PsiViewer plugin installed. This is useful for inspecting parse trees.
 
 ## Testing
 
 ```
-./gradlew test
+./gradlew :plugin:test
 ```

@@ -1,5 +1,8 @@
 apply plugin: 'eta'
 
+// Include the PsiViewer plugin if the ETAJ_DEV property is set.
+if (System.getProperty("ETAJ_DEV") != null) intellij.plugins += ['PsiViewer:3.28.93']
+
 task runJFlex(type: Exec) {
   commandLine '../tools/run-jflex'
 }
