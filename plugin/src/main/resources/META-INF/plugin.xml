@@ -6,6 +6,7 @@
   <description>Eta language support for IntelliJ IDEA.</description>
 
   <extensions defaultExtensionNs="com.intellij">
+    <moduleType id="ETA_ETLAS_MODULE" implementationClass="com.typelead.intellij.plugin.eta.project.module.EtlasModuleType"/>
     <framework.type implementation="com.typelead.intellij.plugin.eta.project.template.EtaFrameworkType"/>
     <lang.syntaxHighlighterFactory
       language="Eta"

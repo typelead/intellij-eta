@@ -8,7 +8,7 @@ import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.ModuleBuilder (addModul
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.ModuleWizardStep (ModuleWizardStep, ModuleWizardStepArray, updateDataModel)
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.SettingsStep (SettingsStep, addSettingsField)
 import           FFI.Com.IntelliJ.Ide.Util.ProjectWizard.WizardContext (WizardContext, isCreatingNewProject)
-import           FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Project.Module.EtlasModuleType (getEtlasModuleType)
+import           FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Project.Module.EtlasModuleType (etlasModuleType)
 import qualified FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Settings.EtaBuildSettings as EtaBuildSettings
 import           FFI.Com.IntelliJ.OpenApi.Module.JavaModuleType (getJavaModuleType)
 import           FFI.Com.IntelliJ.OpenApi.Module.ModuleType (ModuleType, modifyProjectTypeStep)
@@ -35,7 +35,7 @@ foreign export java "@super setupRootModel" superSetupRootModel
 
 foreign export java getModuleType
   :: Java EtlasModuleBuilder (ModuleType EmptyModuleBuilder)
-getModuleType = return (superCast getEtlasModuleType)
+getModuleType = return (superCast etlasModuleType)
 
 foreign export java createWizardSteps
   :: WizardContext

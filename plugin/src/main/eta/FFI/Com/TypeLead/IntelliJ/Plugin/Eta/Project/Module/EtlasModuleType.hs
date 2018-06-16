@@ -11,6 +11,7 @@ data EtlasModuleType = EtlasModuleType
 
 type instance Inherits EtlasModuleType = '[ModuleType EmptyModuleBuilder]
 
+{-# NOINLINE etlasModuleType #-}
 foreign import java unsafe
-  "@static @field com.typelead.intellij.plugin.eta.project.module.EtlasModuleType.INSTANCE"
-  getEtlasModuleType :: EtlasModuleType
+  "@static com.typelead.intellij.plugin.eta.project.module.EtlasModuleType.getInstance"
+  etlasModuleType :: EtlasModuleType

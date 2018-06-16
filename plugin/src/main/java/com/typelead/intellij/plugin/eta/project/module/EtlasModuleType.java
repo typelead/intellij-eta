@@ -2,6 +2,7 @@ package com.typelead.intellij.plugin.eta.project.module;
 
 import com.intellij.ide.util.projectWizard.EmptyModuleBuilder;
 import com.intellij.openapi.module.ModuleType;
+import com.intellij.openapi.module.ModuleTypeManager;
 import com.typelead.intellij.plugin.eta.resources.EtaIcons;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,11 +10,18 @@ import javax.swing.*;
 
 public class EtlasModuleType extends ModuleType<EmptyModuleBuilder> {
 
-  private static String ID = "ETA_ETLAS_MODULE";
+  public static String ID = "ETA_ETLAS_MODULE";
 
-  public static EtlasModuleType INSTANCE = new EtlasModuleType();
+  public static EtlasModuleType getInstance() {
+    if (_instance == null) {
+      _instance = (EtlasModuleType) ModuleTypeManager.getInstance().findByID(ID);
+    }
+    return _instance;
+  }
 
-  private EtlasModuleType() {
+  private static EtlasModuleType _instance = null;
+
+  public EtlasModuleType() {
     super(ID);
   }
 
