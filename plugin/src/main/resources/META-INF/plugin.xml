@@ -1,13 +1,24 @@
-<idea-plugin use-idea-classloader="true">
+<idea-plugin>
   <id>com.typelead</id>
   <name>IntelliJ-Eta</name>
   <vendor url="http://typelead.com/">TypeLead</vendor>
 
   <description>Eta language support for IntelliJ IDEA.</description>
 
+  <!-- Needed so we can access its classes for adding Eta to the supported Gradle frameworks. -->
+  <depends>com.intellij.modules.lang</depends>
+  <depends>org.jetbrains.plugins.gradle</depends>
+
+  <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
+    <frameworkSupport implementation="com.typelead.intellij.plugin.eta.project.template.gradle.GradleEtaFrameworkSupportProvider"/>
+  </extensions>
+
   <extensions defaultExtensionNs="com.intellij">
+
     <moduleType id="ETA_ETLAS_MODULE" implementationClass="com.typelead.intellij.plugin.eta.project.module.EtlasModuleType"/>
+
     <framework.type implementation="com.typelead.intellij.plugin.eta.project.template.EtaFrameworkType"/>
+
     <lang.syntaxHighlighterFactory
       language="Eta"
       implementationClass="com.typelead.intellij.plugin.eta.lang.highlighting.EtaSyntaxHighlighterFactory"
@@ -16,9 +27,12 @@
       language="Eta"
       implementationClass="com.typelead.intellij.plugin.eta.lang.parser.EtaParserDefinition"
     />
-    <projectTemplatesFactory
-      implementation="com.typelead.intellij.plugin.eta.project.template.EtaProjectTemplatesFactory"
-    />
+
+    <!--Disabling this until we finish the Etlas project wizard.-->
+    <!--<projectTemplatesFactory-->
+      <!--implementation="com.typelead.intellij.plugin.eta.project.template.EtaProjectTemplatesFactory"-->
+    <!--/>-->
+
     <lang.substitutor
       language="Haskell"
       implementationClass="com.typelead.intellij.plugin.eta.lang.psi.EtaLanguageSubstitutor"
