@@ -1,7 +1,9 @@
 apply plugin: 'eta'
 
-// Include the PsiViewer plugin if the ETAJ_DEV property is set.
+// Include the PsiViewer plugin if the ETAJ_DEV property is set, e.g. -DETAJ_DEV=1
 if (System.getProperty("ETAJ_DEV") != null) intellij.plugins += ['PsiViewer:3.28.93']
+// Include the HaskForce plugin version if the property is set, e.g. -DHASKFORCE=0.3.41
+if (System.getProperty("HASKFORCE") != null) intellij.plugins += ['com.haskforce:' + System.getProperty("HASKFORCE")]
 
 task runJFlex(type: Exec) {
   commandLine '../tools/run-jflex'
@@ -12,7 +14,7 @@ task cleanJFlex(type: Exec) {
 }
 
 dependencies {
-  compile project(':core')
+//  compile project(':core')
   compile project(':eta-parser')
   compile project(':jps-shared')
   compile project(':jps-plugin')

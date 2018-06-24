@@ -5,7 +5,6 @@
 
   <description>Eta language support for IntelliJ IDEA.</description>
 
-  <!-- Needed so we can access its classes for adding Eta to the supported Gradle frameworks. -->
   <depends>com.intellij.modules.lang</depends>
   <depends>org.jetbrains.plugins.gradle</depends>
 
@@ -33,17 +32,13 @@
       <!--implementation="com.typelead.intellij.plugin.eta.project.template.EtaProjectTemplatesFactory"-->
     <!--/>-->
 
+    <fileTypeFactory implementation="com.typelead.intellij.plugin.eta.lang.EtaFileTypeFactory"/>
+    <facetType implementation="com.typelead.intellij.plugin.eta.lang.EtaFacetType"/>
+
+    <!-- Make this plugin compatible with HaskForce. -->
     <lang.substitutor
       language="Haskell"
       implementationClass="com.typelead.intellij.plugin.eta.lang.psi.EtaLanguageSubstitutor"
     />
-    <fileTypeFactory implementation="com.haskforce.HaskellFileTypeFactory"/>
-    <facetType implementation="com.typelead.intellij.plugin.eta.lang.EtaFacetType"/>
   </extensions>
-
-  <application-components>
-    <component>
-      <implementation-class>com.typelead.intellij.plugin.eta.IntelliJEtaPluginVerifier</implementation-class>
-    </component>
-  </application-components>
 </idea-plugin>
