@@ -4,6 +4,8 @@ import P.Base
 import FFI.Com.IntelliJ.Ide.Util.ProjectWizard.WizardContext (WizardContext)
 import FFI.Com.IntelliJ.Platform.ProjectTemplate (ProjectTemplateArray)
 import FFI.Com.IntelliJ.Platform.ProjectTemplatesFactory (ProjectTemplatesFactory)
+import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Resources.EtaIcons (etaFileIcon)
+import FFI.Javax.Swing.Icon (Icon)
 import IntelliJ.Plugin.Eta.Project.Template.EtlasProjectTemplate (newEtlasProjectTemplate, toProjectTemplate)
 
 data EtaProjectTemplatesFactory = EtaProjectTemplatesFactory
@@ -26,3 +28,6 @@ createTemplates
 createTemplates _ _ = do
   t <- newEtlasProjectTemplate
   arrayFromList [toProjectTemplate t]
+
+foreign export java "getGroupIcon" getGroupIcon :: JString -> Java EtaProjectTemplatesFactory Icon
+getGroupIcon _ = return etaFileIcon

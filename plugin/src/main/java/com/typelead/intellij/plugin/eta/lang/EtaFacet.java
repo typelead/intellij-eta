@@ -2,7 +2,6 @@ package com.typelead.intellij.plugin.eta.lang;
 
 import com.intellij.facet.Facet;
 import com.intellij.facet.FacetConfiguration;
-import com.intellij.facet.FacetType;
 import com.intellij.openapi.module.Module;
 import org.jetbrains.annotations.NotNull;
 

@@ -9,7 +9,7 @@ data EtaBuildSettings = EtaBuildSettings
   deriving Class
 
 foreign import java unsafe "@static com.typelead.intellij.plugin.eta.settings.EtaBuildSettings.getInstance"
-  getInstance :: Project -> Java EtaBuildSettings EtaBuildSettings
+  getInstance :: Project -> Java a EtaBuildSettings
 
 foreign import java unsafe "@new" newEtaBuildSettings
   :: Java a EtaBuildSettings

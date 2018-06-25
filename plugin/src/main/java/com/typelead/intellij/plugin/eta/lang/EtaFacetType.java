@@ -1,16 +1,11 @@
 package com.typelead.intellij.plugin.eta.lang;
 
-import com.intellij.facet.Facet;
-import com.intellij.facet.FacetConfiguration;
-import com.intellij.facet.FacetType;
-import com.intellij.facet.FacetTypeId;
-import com.intellij.facet.ui.DefaultFacetSettingsEditor;
+import com.intellij.facet.*;
 import com.intellij.facet.ui.FacetEditorContext;
 import com.intellij.facet.ui.FacetEditorTab;
 import com.intellij.facet.ui.FacetValidatorsManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleType;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import com.typelead.intellij.plugin.eta.resources.EtaIcons;
@@ -29,6 +24,10 @@ public class EtaFacetType extends FacetType<EtaFacet, FacetConfiguration> {
   public static EtaFacetType getInstance() {
     if (_instance == null) _instance = EP_NAME.findExtension(EtaFacetType.class);
     return _instance;
+  }
+
+  public static void addToModule(Module m) {
+    FacetManager.getInstance(m).addFacet(getInstance(), "Eta", null);
   }
 
   EtaFacetType() {
