@@ -1,6 +1,7 @@
 plugins {
   id 'com.typelead.eta' version '0.6.0' apply false
   id 'org.jetbrains.intellij' version '0.3.1' apply false
+  id "org.jetbrains.kotlin.jvm" version "1.2.50" apply false
 }
 
 apply plugin: 'eta-base'
