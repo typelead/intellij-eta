@@ -1,6 +1,5 @@
 package com.typelead.intellij.plugin.eta.project.template.gradle;
 
-import com.intellij.facet.ModifiableFacetModel;
 import com.intellij.framework.FrameworkTypeEx;
 import com.intellij.openapi.externalSystem.model.project.ProjectId;
 import com.intellij.openapi.module.Module;
@@ -25,7 +24,6 @@ public class GradleEtaFrameworkSupportProvider extends GradleFrameworkSupportPro
   @Override
   public void addSupport(@NotNull ProjectId projectId, @NotNull Module module, @NotNull ModifiableRootModel rootModel, @NotNull ModifiableModelsProvider modifiableModelsProvider, @NotNull BuildScriptDataBuilder buildScriptData) {
     EtaFacetType.addToModule(module);
-    ModifiableFacetModel modifiableFacetModel = modifiableModelsProvider.getFacetModifiableModel(module);
     buildScriptData
       .addPluginDefinitionInPluginsGroup("id 'com.typelead.eta' version '0.7.2'")
       .addPropertyDefinition(
@@ -37,7 +35,6 @@ public class GradleEtaFrameworkSupportProvider extends GradleFrameworkSupportPro
         )
       )
       .addDependencyNotation("compile eta('base:4.8.2.0')");
-
   }
 
   private String unlines(String... lines) {
