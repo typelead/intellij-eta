@@ -25,7 +25,7 @@ public class GradleEtaFrameworkSupportProvider extends GradleFrameworkSupportPro
   public void addSupport(@NotNull ProjectId projectId, @NotNull Module module, @NotNull ModifiableRootModel rootModel, @NotNull ModifiableModelsProvider modifiableModelsProvider, @NotNull BuildScriptDataBuilder buildScriptData) {
     EtaFacetType.addToModule(module);
     buildScriptData
-      .addPluginDefinitionInPluginsGroup("id 'com.typelead.eta' version '0.7.2'")
+      .addPluginDefinitionInPluginsGroup("id 'com.typelead.eta' version '0.7.3'")
       .addPropertyDefinition(
         unlines(
           "eta {",
