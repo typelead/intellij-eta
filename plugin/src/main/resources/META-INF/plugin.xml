@@ -41,4 +41,14 @@
       implementationClass="com.typelead.intellij.plugin.eta.lang.psi.EtaLanguageSubstitutor"
     />
   </extensions>
+
+  <actions>
+    <action
+      id="Eta.NewEtaFile"
+      class="com.typelead.intellij.plugin.eta.actions.CreateEtaFileAction"
+      text="Eta File"
+      description="Create new Eta file">
+      <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+    </action>
+  </actions>
 </idea-plugin>

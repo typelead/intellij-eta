@@ -1,4 +1,5 @@
 apply plugin: 'eta'
+apply plugin: 'kotlin'
 
 // Include the PsiViewer plugin if the ETAJ_DEV property is set, e.g. -DETAJ_DEV=1
 if (System.getProperty("ETAJ_DEV") != null) intellij.plugins += ['PsiViewer:3.28.93']
