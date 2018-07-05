@@ -3,6 +3,7 @@ package com.typelead.intellij.plugin.eta.repl
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.typelead.intellij.utils.Either
 import com.typelead.intellij.utils.NonEmptyList
+import com.typelead.intellij.utils.NonFatal
 import com.typelead.intellij.utils.SystemUtil
 import java.io.BufferedReader
 import java.io.BufferedWriter
@@ -17,12 +18,16 @@ data class EtaReplSettings(
   val etaReplArgs: List<String>
 )
 
-class EtaReplExecutor(settings: EtaReplSettings) {
-
-  private var process: EtaReplProcess? = null
+class EtaReplExecutor(private val settings: EtaReplSettings) {
 
   fun exec(command: String): Either<Throwable, String> =
-    TODO()
+    getProcess().flatMap { it.interact(command) }
+
+  private var unsafeProcess: EtaReplProcess? = null
+
+  private fun getProcess(): Either<Throwable, EtaReplProcess> =
+    if (unsafeProcess != null) Either.right(unsafeProcess)
+    else EtaReplProcess.spawn(settings)
 }
 
 class EtaReplProcess private constructor(
@@ -38,10 +43,18 @@ class EtaReplProcess private constructor(
   fun interact(command: String): Either<Throwable, String> =
     write(command).then { read(checkPrompt = true) }
 
-  fun kill(): Either<Throwable, Unit> =
-    Either.catchNonFatal { process.destroy() }
-      .then { Either.catchNonFatal { input.close() } }
-      .then { Either.catchNonFatal { output.close() } }
+  fun kill(): Unit {
+    fun discardNonFatal(f: () -> Unit) {
+      try {
+        f()
+      } catch (e: Throwable) {
+        if (!NonFatal.apply(e)) throw e
+      }
+    }
+    discardNonFatal { process.destroy() }
+    discardNonFatal { input.close() }
+    discardNonFatal { output.close() }
+  }
 
   /** Initialize the repl, consuming until the first prompt. */
   private fun init(): Either<Throwable, EtaReplProcess> =

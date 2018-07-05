@@ -59,6 +59,8 @@ public abstract class Either<L, R> {
 
   abstract public <X> Either<X, R> leftMap(Function<L, X> f);
 
+  abstract public Either<L, R> leftFlatMap(Function<L, Either<L, R>> f);
+
   abstract public R valueOr(Function<L, R> f);
 
   abstract public Either<R, L> swap();
@@ -111,6 +113,11 @@ public abstract class Either<L, R> {
     @Override
     public <X> Either<X, Object> leftMap(Function<L, X> f) {
       return new Left<>(f.apply(value));
+    }
+
+    @Override
+    public Either<L, Object> leftFlatMap(Function<L, Either<L, Object>> f) {
+      return f.apply(value);
     }
 
     @Override
@@ -174,6 +181,11 @@ public abstract class Either<L, R> {
 
     @Override
     public <X> Either<X, R> leftMap(Function<Object, X> f) {
+      return castL();
+    }
+
+    @Override
+    public Either<Object, R> leftFlatMap(Function<Object, Either<Object, R>> f) {
       return castL();
     }
 
