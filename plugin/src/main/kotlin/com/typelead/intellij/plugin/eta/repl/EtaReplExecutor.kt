@@ -9,6 +9,7 @@ import java.io.BufferedWriter
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.util.*
+import java.util.regex.Pattern
 
 data class EtaReplSettings(
   val workDir: String,
@@ -25,16 +26,47 @@ class EtaReplExecutor(settings: EtaReplSettings) {
 }
 
 class EtaReplProcess private constructor(
-  private val version: String,
   private val process: Process,
   private val input: BufferedReader,
   private val output: BufferedWriter
 ) {
 
+  private var version: String? = null
+
   private val prompt = "intellij-eta-repl-${UUID.randomUUID()}>"
 
   fun interact(command: String): Either<Throwable, String> =
     write(command).then { read(checkPrompt = true) }
+
+  fun kill(): Either<Throwable, Unit> =
+    Either.catchNonFatal { process.destroy() }
+      .then { Either.catchNonFatal { input.close() } }
+      .then { Either.catchNonFatal { output.close() } }
+
+  /** Initialize the repl, consuming until the first prompt. */
+  private fun init(): Either<Throwable, EtaReplProcess> =
+    write(":set +c").then {
+      // Use a trailing \n so that `input.readLine()` in `read()` will contain just prompt
+      // so we can use it as a delimiter.
+      write(""":set prompt "$prompt\n" """)
+    }.then {
+      // Consume output until the prompt.
+      read(checkPrompt = true).bimap<Throwable, EtaReplProcess>(
+        { e -> ReplError.InitError("Failed to read output to prompt", e) },
+        { s ->
+          detectVersion(s).map { v -> this.version = v }
+          this
+        }
+      )
+    }
+
+  private fun detectVersion(out: String): Optional<String> {
+    val m = STARTUP_VERSION_REGEX.matcher(out)
+    if (!m.find()) return Optional.empty()
+    val version = m.group(1)
+    // Convert a version number of 0.
+    return Optional.of(version.replace('b', '.'))
+  }
 
   private fun write(command: String): Either<Throwable, Unit> =
     Either.catchNonFatal {
@@ -43,7 +75,7 @@ class EtaReplProcess private constructor(
       output.flush()
     }.leftMap { e ->
       val message = read(checkPrompt = false).toOptional().filter { it.trim().isNotEmpty() }.orElse(e.toString())
-      ExecError(command, message, e)
+      ReplError.ExecError(command, message, e)
     }
 
   private fun read(checkPrompt: Boolean): Either<Throwable, String> =
@@ -63,14 +95,17 @@ class EtaReplProcess private constructor(
 
   companion object {
 
-    class InitError(message: String, cause: Throwable?)
-      : Exception("Failed to initialize repl: $message", cause)
+    sealed class ReplError(message: String, cause: Throwable?) : Exception(message, cause) {
 
-    class ExecError(command: String, message: String, cause: Throwable?)
-      : Exception("Executing repl command '$command' failed: $message", cause)
+      class InitError(message: String, cause: Throwable?)
+        : ReplError("Failed to initialize repl: $message", cause)
+
+      class ExecError(command: String, message: String, cause: Throwable?)
+        : ReplError("Executing repl command '$command' failed: $message", cause)
+    }
 
     fun spawn(settings: EtaReplSettings): Either<Throwable, EtaReplProcess> =
-      getVersion(settings).flatMap { version ->
+      execNumericVersion(settings).flatMap { version ->
        Either.catchNonFatal {
           GeneralCommandLine()
             .withExePath(settings.etaReplCommand.head)
@@ -80,40 +115,34 @@ class EtaReplProcess private constructor(
             .createProcess()
         }.map { process ->
           EtaReplProcess(
-            version = version,
             process = process,
             input   = BufferedReader(InputStreamReader(process.inputStream)),
             output  = BufferedWriter(OutputStreamWriter(process.outputStream))
           )
-        }.flatMap { p ->
-           p.write(":set +c").then {
-             // Use a trailing \n so that `input.readLine()` in `read()` will contain just prompt
-             // so we can use it as a delimiter.
-             p.write(""":set prompt "${p.prompt}\n" """)
-           }.then {
-             p.read()
-           }.flatMap { s ->
-             Either.cond<Throwable, EtaReplProcess>(
-               s.endsWith(p.prompt),
-               { p },
-               { InitError("Could not find prompt '${p.prompt}' in repl output:\n$s", cause = null) }
-             )
-           }
-        }
+        }.flatMap {
+         it.init()
+       }.flatMap { p ->
+         // init() attempts to set the version field. If this fails it will be null and
+         // we can fall back to shelling out to obtain the version info.
+         if (p.version == null) execNumericVersion(settings).map { v -> p.version = v; p }
+         else Either.right<Throwable, EtaReplProcess>(p)
+       }
       }
 
-    private fun getVersion(settings: EtaReplSettings): Either<Throwable, String> =
+    private val STARTUP_VERSION_REGEX = Pattern.compile("Welcome to Eta REPL v([0-9.b])")
+
+    private fun execNumericVersion(settings: EtaReplSettings): Either<Throwable, String> =
       Either.catchNonFatal {
         GeneralCommandLine()
           .withExePath(settings.etaReplCommand.head)
-          .withParameters(getVersionParams(settings))
+          .withParameters(getNumericVersionParameters(settings))
           .withWorkDirectory(settings.workDir)
           .createProcess()
       }.flatMap { process ->
         Either.catchNonFatal { process.inputStream.bufferedReader().readLine() }
       }
 
-    private fun getVersionParams(settings: EtaReplSettings): List<String> =
+    private fun getNumericVersionParameters(settings: EtaReplSettings): List<String> =
       if (settings.etaReplCommand.head == "etlas") {
         settings.etaReplCommand.tail + "--eta-option=--numeric-version"
       } else {

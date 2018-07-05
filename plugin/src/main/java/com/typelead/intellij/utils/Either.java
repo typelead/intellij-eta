@@ -51,7 +51,11 @@ public abstract class Either<L, R> {
 
   abstract public <X> Either<L, X> then(Supplier<Either<L, X>> f);
 
+  abstract public <X> Either<L, X> as(Supplier<X> f);
+
   abstract public <X> X fold(Function<L, X> f, Function<R, X> g);
+
+  abstract public <X, Y> Either<X, Y> bimap(Function<L, X> f, Function <R, Y> g);
 
   abstract public <X> Either<X, R> leftMap(Function<L, X> f);
 
@@ -69,27 +73,39 @@ public abstract class Either<L, R> {
       this.value = value;
     }
 
-    @Override
-    public <X> Either<L, X> map(Function<Object, X> f) {
+    public <X> Either<L, X> castR() {
       //noinspection unchecked
       return (Either<L, X>) this;
+    }
+
+    @Override
+    public <X> Either<L, X> map(Function<Object, X> f) {
+      return castR();
     }
 
     @Override
     public <X> Either<L, X> flatMap(Function<Object, Either<L, X>> f) {
-      //noinspection unchecked
-      return (Either<L, X>) this;
+      return castR();
     }
 
     @Override
     public <X> Either<L, X> then(Supplier<Either<L, X>> f) {
-      //noinspection unchecked
-      return (Either<L, X>) this;
+      return castR();
+    }
+
+    @Override
+    public <X> Either<L, X> as(Supplier<X> f) {
+      return castR();
     }
 
     @Override
     public <X> X fold(Function<L, X> f, Function<Object, X> g) {
       return f.apply(value);
+    }
+
+    @Override
+    public <X, Y> Either<X, Y> bimap(Function<L, X> f, Function<Object, Y> g) {
+      return left(f.apply(value));
     }
 
     @Override
@@ -137,14 +153,28 @@ public abstract class Either<L, R> {
     }
 
     @Override
+    public <X> Either<Object, X> as(Supplier<X> f) {
+      return right(f.get());
+    }
+
+    @Override
     public <X> X fold(Function<Object, X> f, Function<R, X> g) {
       return g.apply(value);
     }
 
     @Override
-    public <X> Either<X, R> leftMap(Function<Object, X> f) {
+    public <X, Y> Either<X, Y> bimap(Function<Object, X> f, Function<R, Y> g) {
+      return right(g.apply(value));
+    }
+
+    public <X> Either<X, R> castL() {
       //noinspection unchecked
       return (Either<X, R>) this;
+    }
+
+    @Override
+    public <X> Either<X, R> leftMap(Function<Object, X> f) {
+      return castL();
     }
 
     @Override
