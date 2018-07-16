@@ -45,6 +45,11 @@ public abstract class Either<L, R> {
     return e.fold(x -> x, x -> x);
   }
 
+  public static <X> X valueOrThrow(Either<? extends Throwable, X> e) {
+    if (e instanceof Left) throw ((Left<? extends Throwable>) e).value;
+    return ((Right<X>) e).value;
+  }
+
   abstract public <X> Either<L, X> map(Function<R, X> f);
 
   abstract public <X> Either<L, X> flatMap(Function<R, Either<L, X>> f);
