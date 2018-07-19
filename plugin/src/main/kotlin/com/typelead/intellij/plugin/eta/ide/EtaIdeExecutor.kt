@@ -3,7 +3,6 @@ package com.typelead.intellij.plugin.eta.ide
 import com.google.gson.*
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.typelead.intellij.utils.Either
-import com.typelead.intellij.utils.NonFatal
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.InputStreamReader
@@ -18,7 +17,7 @@ class EtaIdeExecutor(private val settings: EtaIdeSettings) {
 
   fun browse(module: String): Either<Throwable, List<BrowseItem>> =
     getProcess()
-      .flatMap { it.interact(":browse") }
+      .flatMap { it.interact(":idebrowse") }
       .flatMap { x -> IdeResponse.fromJsonOfBrowseItems(x) }
       .map { x -> x.result }
 
@@ -102,19 +101,18 @@ data class IdeResponse<A>(
     val fromJsonOfBrowseItems = fromJsonWith(gson.fromJsonArrayWith(BrowseItem.fromJsonElement))
     val fromJsonOfString = fromJsonWith { e -> Either.catchNonFatal { e.asString } }
 
-    fun <A> fromJsonWith(f: (JsonElement) -> Either<Throwable, A>): (String) -> Either<Throwable, IdeResponse<A>> =
-      { s ->
-        Either.catchNonFatal {
-          JsonParser().parse(s).asJsonObject
-        }.flatMap { o ->
-          f(o.get("result")).map { result ->
-            IdeResponse(
-              o.get("command").asString,
-              o.get("args").asJsonArray.toList().map { it.asString },
-              result
-            )
-          }
-        }
+    private fun <A> fromJsonWith(
+      f: (JsonElement) -> Either<Throwable, A>
+    ): (String) -> Either<Throwable, IdeResponse<A>> = { s ->
+      Either.catchNonFatal {
+        JsonParser().parse(s).asJsonObject
+      }.flatMap { o ->
+        f(o.get("result")).map { result ->
+          IdeResponse(
+            o.get("command").asString,
+            o.get("args").asJsonArray.toList().map { it.asString },
+            result
+          )
         }
       }
     }
