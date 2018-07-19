@@ -152,7 +152,7 @@ object gson {
   fun <A> fromJsonArrayWith(f: (JsonElement) -> Either<Throwable, A>): (JsonElement) -> Either<Throwable, List<A>> =
     { e ->
       Either.catchNonFatal {
-        e.asJsonArray.toList().map { x -> Either.valueOrThrow(f(x)) }
+        e.asJsonArray.toList().map { x -> f(x).valueOr { throw it } }
       }
     }
 }
