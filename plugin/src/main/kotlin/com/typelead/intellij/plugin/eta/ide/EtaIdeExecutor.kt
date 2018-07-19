@@ -15,11 +15,16 @@ data class EtaIdeSettings(
 
 class EtaIdeExecutor(private val settings: EtaIdeSettings) {
 
+  fun terminate(): Either<Throwable, Unit> =
+    getProcess().map { it.kill() }
+
+  fun version(): Either<Throwable, String> =
+    getProcess().map { it.getVersion() }
+
   fun browse(module: String): Either<Throwable, List<BrowseItem>> =
-    getProcess()
-      .flatMap { it.interact(":idebrowse") }
-      .flatMap { x -> IdeResponse.fromJsonOfBrowseItems(x) }
-      .map { x -> x.result }
+    exec(":idebrowse $module")
+      .flatMap(IdeResponse.fromJsonOfBrowseItems)
+      .map { it.result }
 
   fun exec(command: String): Either<Throwable, String> =
     getProcess().flatMap { it.interact(command) }
@@ -28,7 +33,7 @@ class EtaIdeExecutor(private val settings: EtaIdeSettings) {
 
   private fun getProcess(): Either<Throwable, EtaIdeProcess> =
     if (unsafeProcess != null) Either.right(unsafeProcess)
-    else EtaIdeProcess.spawn(settings)
+    else EtaIdeProcess.spawn(settings).map { p -> unsafeProcess = p; p }
 }
 
 class EtaIdeProcess private constructor(
@@ -46,6 +51,9 @@ class EtaIdeProcess private constructor(
         version = response.result
         this
       }
+
+  fun getVersion(): String =
+    version ?: throw IllegalStateException("version is uninitialized")
 
   fun interact(command: String): Either<Throwable, String> =
     write(command).then { read() }
@@ -78,6 +86,7 @@ class EtaIdeProcess private constructor(
       Either.catchNonFatal {
         GeneralCommandLine()
            .withExePath(settings.etaIdePath)
+           .withParameters("-fdiagnostics-color=never")
            .withWorkDirectory(settings.workDir)
            .withRedirectErrorStream(true)
            .createProcess()
@@ -106,6 +115,8 @@ data class IdeResponse<A>(
     ): (String) -> Either<Throwable, IdeResponse<A>> = { s ->
       Either.catchNonFatal {
         JsonParser().parse(s).asJsonObject
+      }.leftMap { e ->
+        IllegalStateException("Failed to parse JSON: $s", e) as Throwable
       }.flatMap { o ->
         f(o.get("result")).map { result ->
           IdeResponse(

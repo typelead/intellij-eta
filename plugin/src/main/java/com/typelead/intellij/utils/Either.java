@@ -27,7 +27,7 @@ public abstract class Either<L, R> {
     try {
       return right(f.get());
     } catch (Throwable e) {
-      if (NonFatal.apply(e)) left(e);
+      if (NonFatal.apply(e)) return left(e);
       throw e;
     }
   }
