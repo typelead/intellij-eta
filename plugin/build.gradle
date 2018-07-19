@@ -20,7 +20,7 @@ dependencies {
   compile project(':jps-plugin')
   compile eta('base:[4.8,4.9[')
   compile eta('containers:0.5.10.+')
-  compile eta('eta-java-interop:0.1.3.+')
+  compile eta('eta-java-interop:[0.1.3,0.2[')
 }
 
 compileJava.dependsOn(runJFlex)
