@@ -12,9 +12,9 @@ import qualified FFI.Com.IntelliJ.Psi.TokenType as TokenType
 import qualified FFI.Com.IntelliJ.Psi.Tree.TokenSet as TokenSet
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.EtaLanguage
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Psi.EtaFile
-import FFI.Com.TypeLead.IntelliJ.Utils.Parser.SimplePsiParser
 
 import IntelliJ.Plugin.Eta.Lang.Lexer.EtaParsingLexer (newEtaParsingLexer)
+import IntelliJ.Plugin.Eta.Lang.Parser.EtaPsiParser
 import IntelliJ.Plugin.Eta.Lang.Psi.EtaElementFactory
 
 data {-# CLASS "com.typelead.intellij.plugin.eta.lang.parser.EtaParserDefinition implements com.intellij.lang.ParserDefinition" #-}
@@ -27,7 +27,7 @@ createLexer _ = superCastJ newEtaParsingLexer
 
 foreign export java "createParser" createParser
   :: Project -> Java EtaParserDefinition PsiParser
-createParser _project = superCastJ newSimplePsiParser
+createParser _project = fromEtaPsiParser <$> newEtaPsiParser
 
 {-# NOINLINE fileNodeType #-}
 fileNodeType :: IFileElementType

@@ -9,13 +9,16 @@ import FFI.Com.IntelliJ.Lang.ASTNode
 import FFI.Com.IntelliJ.Psi.Tree.IElementType
 
 -- | Wrapper around IntelliJ's PsiBuilder for building Monadic parsers.
-newtype Psi s a = Psi { runPsi :: ReaderT PsiBuilder (Java s) a }
+newtype Psi s a = Psi { unPsi :: ReaderT PsiBuilder (Java s) a }
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader PsiBuilder
     )
+
+evalPsi :: PsiBuilder -> Psi s a -> Java s a
+evalPsi b (Psi (ReaderT f)) = f b
 
 data MarkResult
   = MarkDone IElementType
@@ -90,6 +93,8 @@ whenTokenIs p b = do
 builderError :: JString -> Psi s ()
 builderError msg = calling $ psiBuilderError msg
 
+consumeUntilEOF = advanceWhile (return True) $ return ()
+
 whileM_ :: Monad m => m Bool -> m a -> m ()
 whileM_ p f = go
   where
@@ -107,35 +112,35 @@ data PsiBuilder = PsiBuilder
 
 type instance Inherits PsiBuilder = '[Object]
 
-foreign import java unsafe "getProject" psiBuilderGetProject :: Java PsiBuilder Project
+foreign import java unsafe "@interface getProject" psiBuilderGetProject :: Java PsiBuilder Project
 
 instance GetProject PsiBuilder where
   getProject = psiBuilderGetProject
 
-foreign import java unsafe "advanceLexer" psiBuilderAdvanceLexer :: Java PsiBuilder ()
+foreign import java unsafe "@interface advanceLexer" psiBuilderAdvanceLexer :: Java PsiBuilder ()
 
-foreign import java unsafe "getTokenType" psiBuilderGetTokenType :: Java PsiBuilder IElementType
+foreign import java unsafe "@interface getTokenType" psiBuilderGetTokenType :: Java PsiBuilder IElementType
 
-foreign import java unsafe "lookAhead" psiBuilderLookAhead :: Int -> Java PsiBuilder IElementType
+foreign import java unsafe "@interface lookAhead" psiBuilderLookAhead :: Int -> Java PsiBuilder IElementType
 
-foreign import java unsafe "remapCurrentToken" psiBuilderRemapCurrentToken :: IElementType -> Java PsiBuilder ()
+foreign import java unsafe "@interface remapCurrentToken" psiBuilderRemapCurrentToken :: IElementType -> Java PsiBuilder ()
 
-foreign import java unsafe "mark" psiBuilderMark :: Java PsiBuilder Marker
+foreign import java unsafe "@interface mark" psiBuilderMark :: Java PsiBuilder Marker
 
-foreign import java unsafe "error" psiBuilderError :: JString -> Java PsiBuilder ()
+foreign import java unsafe "@interface error" psiBuilderError :: JString -> Java PsiBuilder ()
 
-foreign import java unsafe "eof" psiBuilderEof :: Java PsiBuilder Bool
+foreign import java unsafe "@interface eof" psiBuilderEof :: Java PsiBuilder Bool
 
-foreign import java unsafe "getTreeBuilt" psiBuilderGetTreeBuilt :: Java PsiBuilder ASTNode
+foreign import java unsafe "@interface getTreeBuilt" psiBuilderGetTreeBuilt :: Java PsiBuilder ASTNode
 
 data Marker = Marker
-  @com.intellij.lang.PsiBuilder.Marker
+  @com.intellij.lang.PsiBuilder$Marker
   deriving Class
 
 type instance Inherits Marker = '[Object]
 
-foreign import java unsafe "done" markerDone :: IElementType -> Java Marker ()
+foreign import java unsafe "@interface done" markerDone :: IElementType -> Java Marker ()
 
-foreign import java unsafe "collapse" markerCollapse :: IElementType -> Java Marker ()
+foreign import java unsafe "@interface collapse" markerCollapse :: IElementType -> Java Marker ()
 
-foreign import java unsafe "error" markerError :: JString -> Java Marker ()
+foreign import java unsafe "@interface error" markerError :: JString -> Java Marker ()
