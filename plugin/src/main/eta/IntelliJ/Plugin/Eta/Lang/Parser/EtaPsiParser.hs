@@ -10,7 +10,6 @@ import FFI.Com.IntelliJ.Lang.PsiParser
 import FFI.Com.IntelliJ.Psi.Tree.IElementType
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Psi.EtaTokenTypes
 
--- TODO: This doesn't work, attempts to use `extends` instead of `implements`
 data EtaPsiParser = EtaPsiParser
   @com.typelead.intellij.plugin.eta.lang.parser.EtaPsiParser
   deriving Class
