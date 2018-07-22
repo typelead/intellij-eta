@@ -1,10 +1,14 @@
 module FFI.Com.IntelliJ.Psi.Tree.IElementType where
 
-import P
+import P.Base
+
+import FFI.Com.IntelliJ.Lang.Language
 
 data {-# CLASS "com.intellij.psi.tree.IElementType" #-}
   IElementType = IElementType (Object# IElementType)
   deriving Class
+
+foreign import java unsafe "@new" newIElementType :: JString -> Language -> Java a IElementType
 
 foreign import java unsafe getIndex :: IElementType -> Short
 

@@ -9,8 +9,9 @@ module P.Base
 import Prelude as X hiding (String, head, tail)
 import Control.Exception as X
 import Control.Monad as X
+import Data.Foldable as X
 import qualified Data.Int
-import Data.List as X (intercalate)
+import Data.List as X (intercalate, intersperse)
 import Data.Maybe as X
 import Data.Monoid as X
 import Data.Typeable
@@ -26,6 +27,7 @@ import Java.String as X (fromJString, toJString)
 import qualified Java
 import qualified Java.Do
 import qualified Java.Exception
+import Java.Utils as X (safeDowncast)
 import qualified Java.Utils
 import qualified Unsafe.Coerce
 

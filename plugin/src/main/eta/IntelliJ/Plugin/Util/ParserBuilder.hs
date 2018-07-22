@@ -43,8 +43,8 @@ markStart p = do
     MarkError msg   -> marker <.> markerError msg
   return parseRes
 
-markDone :: IElementType -> Psi s (MarkResult, ())
-markDone el = return (MarkDone el, ())
+markDone :: (a <: IElementType) => a -> Psi s (MarkResult, ())
+markDone el = return (MarkDone $ superCast el, ())
 
 markError :: JString -> Psi s (MarkResult, ())
 markError msg = return (MarkError msg, ())
@@ -67,15 +67,22 @@ remapAdvance el = calling (psiBuilderRemapCurrentToken el) >> advanceLexer
 getTokenType :: Psi s IElementType
 getTokenType = calling psiBuilderGetTokenType
 
-expectTokenAdvance :: IElementType -> Psi s Bool
-expectTokenAdvance el = expectAdvance ((el ==) <$> getTokenType) $ "Expected " <> toStringJava el
+expectTokenAdvance :: IElementType -> Psi s ()
+expectTokenAdvance el =
+  expectAdvance ((el ==) <$> getTokenType)
+    $ "Expected " <> toStringJava el
 
-expectAdvance :: Psi s Bool -> JString -> Psi s Bool
+expectTokenOneOfAdvance :: [IElementType] -> Psi s ()
+expectTokenOneOfAdvance els =
+  expectAdvance ((`elem` els) <$> getTokenType)
+    $ "Expected one of " <> (fold $ intersperse ", " $ map toStringJava els)
+
+expectAdvance :: Psi s Bool -> JString -> Psi s ()
 expectAdvance p msg = do
   x <- p
   when (not x) $ builderError msg
   advanceLexer
-  return x
+  return ()
 
 advanceWhile :: Psi s Bool -> Psi s () -> Psi s ()
 advanceWhile p b = whileM_ matched $ b >> advanceLexer
