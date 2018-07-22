@@ -27,7 +27,7 @@ createLexer _ = superCastJ newEtaParsingLexer
 
 foreign export java "createParser" createParser
   :: Project -> Java EtaParserDefinition PsiParser
-createParser _project = fromEtaPsiParser <$> newEtaPsiParser
+createParser _project = superCastJ newEtaPsiParser
 
 {-# NOINLINE fileNodeType #-}
 fileNodeType :: IFileElementType

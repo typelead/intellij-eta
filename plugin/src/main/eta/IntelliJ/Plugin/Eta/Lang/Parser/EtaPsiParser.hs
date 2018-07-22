@@ -11,19 +11,11 @@ import FFI.Com.IntelliJ.Psi.Tree.IElementType
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Psi.EtaTokenTypes
 
 -- TODO: This doesn't work, attempts to use `extends` instead of `implements`
--- data EtaPsiParser = EtaPsiParser
---   @com.typelead.intellij.plugin.eta.lang.parser.EtaPsiParser
---   deriving Class
---
--- type instance Inherits EtaPsiParser = '[PsiParser]
-
-data {-# CLASS "com.typelead.intellij.plugin.eta.lang.parser.EtaPsiParser implements com.intellij.lang.PsiParser" #-}
-  EtaPsiParser = EtaPsiParser (Object# EtaPsiParser)
+data EtaPsiParser = EtaPsiParser
+  @com.typelead.intellij.plugin.eta.lang.parser.EtaPsiParser
   deriving Class
 
--- Using this to get around the Inherits problem detailed above.
-fromEtaPsiParser :: EtaPsiParser -> PsiParser
-fromEtaPsiParser = unsafeRuntimeCast
+type instance Inherits EtaPsiParser = '[Object, PsiParser]
 
 foreign import java unsafe "@new" newEtaPsiParser :: Java a EtaPsiParser
 
