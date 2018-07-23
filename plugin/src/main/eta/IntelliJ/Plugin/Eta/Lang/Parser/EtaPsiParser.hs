@@ -49,12 +49,8 @@ parseModule = whenTokenIs (== jITmodule) $ markStart $ do
 
 parseModuleName :: Psi s ()
 parseModuleName = markStart $ do
-  t <- getTokenType
-  if t `elem` [jITconid, jITqconid] then do
-    advanceLexer
-    markDone wEtaModuleName
-  else
-    markError $ "Missing module name"
+  advanced <- maybeTokenOneOfAdvance [jITconid, jITqconid]
+  if advanced then markDone wEtaModuleName else markError "Missing module name"
 
 parseImports :: Psi s ()
 parseImports = whenTokenIs (== jITimport) $ markStart $ do
@@ -78,23 +74,23 @@ parseImport = markStart $ do
       markDone wEtaImportAlias
   whenTokenIs (== jIToparen) $ do
     advanceLexer
-    -- Also handles the jITcparen
-    parseImportNames wEtaImportExplicit
+    markStart $ do
+      -- Also handles the jITcparen
+      parseImportNames wEtaImportExplicit
+      markDone wEtaImportExplicits
   whenTokenIs (== jIThiding) $ do
     advanceLexer
     expectTokenAdvance jIToparen
-    -- Also handles the jITcparen
-    parseImportNames wEtaImportHidden
+    markStart $ do
+      -- Also handles the jITcparen
+      parseImportNames wEtaImportHidden
+      markDone wEtaImportHiddens
   markDone wEtaImport
 
 parseImportModule :: Psi s ()
 parseImportModule = markStart $ do
-  t <- getTokenType
-  if t `elem` [jITconid, jITqconid] then do
-    advanceLexer
-    markDone wEtaImportModule
-  else
-    markError $ "Missing import module"
+  advanced <- maybeTokenOneOfAdvance [jITconid, jITqconid]
+  if advanced then markDone wEtaImportModule else markError "Missing import module"
 
 parseImportNames :: EtaNodeTypeWrapper -> Psi s ()
 parseImportNames wnode = do
@@ -102,11 +98,11 @@ parseImportNames wnode = do
   loop
   where
   loop = do
-    t <- getTokenType
-    if t == jITcparen then do
+    mt <- getTokenType
+    if jITcparen `elem` mt then do
       advanceLexer
       return ()
-    else if t == jITcomma then do
+    else if jITcomma `elem` mt then do
       advanceLexer
       parseImportName wnode
       loop
@@ -115,25 +111,25 @@ parseImportNames wnode = do
 
 parseImportName :: EtaNodeTypeWrapper -> Psi s ()
 parseImportName wnode = do
-  hasParen <- (jIToparen ==) <$> getTokenType
+  hasParen <- (jIToparen `elem`) <$> getTokenType
   when hasParen advanceLexer
-  t <- getTokenType
-  if t `elem` [jITconid, jITvarid, jITconsym, jITvarsym] then do
-    markStart $ advanceLexer >> markDone wnode
-    parseImportConstructorsOrMethods wnode
-  else
-    builderError "Invalid explicit import; expected id, constructor, or symbol"
-  when hasParen $ expectTokenAdvance jITcparen
+  withTokenType $ \t -> do
+    if t `elem` [jITconid, jITvarid, jITconsym, jITvarsym] then do
+      markStart $ advanceLexer >> markDone wnode
+      parseImportConstructorsOrMethods wnode
+    else
+      builderError "Invalid explicit import; expected id, constructor, or symbol"
+    when hasParen $ expectTokenAdvance jITcparen
 
 parseImportConstructorsOrMethods :: EtaNodeTypeWrapper -> Psi s ()
 parseImportConstructorsOrMethods wnode = whenTokenIs (== jIToparen) $ do
   advanceLexer
-  t <- getTokenType
-  if t == jITdotdot then
-    markStart $ advanceLexer >> markDone wnode
-  else
-    loop
-  expectTokenAdvance jITcparen
+  withTokenType $ \t -> do
+    if t == jITdotdot then
+      markStart $ advanceLexer >> markDone wnode
+    else
+      loop
+    expectTokenAdvance jITcparen
   where
   loop = do
     parseImportName wnode

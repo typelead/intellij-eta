@@ -13,7 +13,9 @@ data EtaNodeType
   | EtaImport
   | EtaImportModule
   | EtaImportAlias
+  | EtaImportExplicits
   | EtaImportExplicit
+  | EtaImportHiddens
   | EtaImportHidden
   | EtaUnknown
   deriving (Show, Bounded, Enum, Eq)
@@ -42,9 +44,17 @@ wEtaImportModule = unsafeMkNodeType EtaImportModule
 wEtaImportAlias :: EtaNodeTypeWrapper
 wEtaImportAlias = unsafeMkNodeType EtaImportAlias
 
+{-# NOINLINE wEtaImportExplicits #-}
+wEtaImportExplicits :: EtaNodeTypeWrapper
+wEtaImportExplicits = unsafeMkNodeType EtaImportExplicits
+
 {-# NOINLINE wEtaImportExplicit #-}
 wEtaImportExplicit :: EtaNodeTypeWrapper
 wEtaImportExplicit = unsafeMkNodeType EtaImportExplicit
+
+{-# NOINLINE wEtaImportHiddens #-}
+wEtaImportHiddens :: EtaNodeTypeWrapper
+wEtaImportHiddens = unsafeMkNodeType EtaImportHiddens
 
 {-# NOINLINE wEtaImportHidden #-}
 wEtaImportHidden :: EtaNodeTypeWrapper

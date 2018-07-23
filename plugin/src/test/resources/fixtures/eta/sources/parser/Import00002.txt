@@ -12,48 +12,48 @@ Eta file
         PsiElement(ITconid)('Prelude')
       PsiElement(IThiding)('hiding')
       PsiElement(IToparen)('(')
-      PsiElement(ITvarid)('zipWith')
-      PsiErrorElement:Invalid explicit import; expected id, constructor, or symbol
-        <empty list>
-      PsiElement(ITcomma)(',')
-      EtaImportHidden
-        PsiElement(ITvarid)('head')
-      PsiElement(ITcparen)(')')
-      PsiErrorElement:Expected ITcparen
-        <empty list>
+      EtaImportHiddens
+        EtaImportHidden
+          PsiElement(ITvarid)('zipWith')
+        PsiElement(ITcomma)(',')
+        EtaImportHidden
+          PsiElement(ITvarid)('head')
+        PsiElement(ITcparen)(')')
     EtaImport
       PsiElement(ITimport)('import')
       EtaImportModule
         PsiElement(ITqconid)('Data.Maybe')
       PsiElement(IToparen)('(')
-      PsiElement(ITvarid)('fromMaybe')
-      PsiErrorElement:Invalid explicit import; expected id, constructor, or symbol
-        <empty list>
-      PsiElement(ITcomma)(',')
-      EtaImportExplicit
-        PsiElement(ITvarid)('isJust')
-      PsiElement(ITcparen)(')')
-      PsiErrorElement:Expected ITcparen
-        <empty list>
+      EtaImportExplicits
+        EtaImportExplicit
+          PsiElement(ITvarid)('fromMaybe')
+        PsiElement(ITcomma)(',')
+        EtaImportExplicit
+          PsiElement(ITvarid)('isJust')
+        PsiElement(ITcparen)(')')
     EtaImport
       PsiElement(ITimport)('import')
       PsiElement(ITqualified)('qualified')
       EtaImportModule
         PsiElement(ITqconid)('Data.Maybe')
       PsiElement(IToparen)('(')
-      PsiElement(ITconid)('Maybe')
-      PsiElement(IToparen)('(')
-      PsiErrorElement:Invalid explicit import; expected id, constructor, or symbol
-        <empty list>
-      PsiElement(ITdotdot)('..')
-      PsiElement(ITcparen)(')')
-      PsiElement(ITcparen)(')')
+      EtaImportExplicits
+        EtaImportExplicit
+          PsiElement(ITconid)('Maybe')
+        PsiElement(IToparen)('(')
+        EtaImportExplicit
+          PsiElement(ITdotdot)('..')
+        PsiElement(ITcparen)(')')
+        PsiElement(ITcparen)(')')
+    EtaImport
+      PsiElement(ITimport)('import')
+      PsiElement(ITqualified)('qualified')
+      EtaImportModule
+        PsiElement(ITconid)('Prelude')
+      PsiElement(ITas)('as')
+      EtaImportAlias
+        PsiElement(ITconid)('P')
   EtaUnknown
-    PsiElement(ITimport)('import')
-    PsiElement(ITqualified)('qualified')
-    PsiElement(ITconid)('Prelude')
-    PsiElement(ITas)('as')
-    PsiElement(ITconid)('P')
     PsiElement(ITdata)('data')
     PsiElement(ITconid)('Maybe2')
     PsiElement(ITvarid)('a')

@@ -64,23 +64,24 @@ advanceLexer = calling psiBuilderAdvanceLexer
 remapAdvance :: IElementType -> Psi s ()
 remapAdvance el = calling (psiBuilderRemapCurrentToken el) >> advanceLexer
 
-getTokenTypeMaybe :: Psi s (Maybe IElementType)
-getTokenTypeMaybe = calling psiBuilderGetTokenType
+getTokenType :: Psi s (Maybe IElementType)
+getTokenType = calling psiBuilderGetTokenType
 
-getTokenType :: Psi s IElementType
-getTokenType = getTokenTypeMaybe >>= \case
-  Just e -> pure e
-  Nothing -> error "getTokenType returned null"
+withTokenType :: (IElementType -> Psi s ()) -> Psi s ()
+withTokenType f = getTokenType >>= \case
+  Just el -> f el
+  Nothing -> builderError "Unexpected end of input"
 
 expectTokenAdvance :: IElementType -> Psi s ()
-expectTokenAdvance el =
-  expectAdvance ((el ==) <$> getTokenType)
-    $ "Expected " <> toStringJava el
+expectTokenAdvance el = withTokenType $ \t ->
+  if t == el then advanceLexer else builderError $ "Expected " <> toStringJava el
 
 expectTokenOneOfAdvance :: [IElementType] -> Psi s ()
-expectTokenOneOfAdvance els =
-  expectAdvance ((`elem` els) <$> getTokenType)
-    $ "Expected one of " <> (fold $ intersperse ", " $ map toStringJava els)
+expectTokenOneOfAdvance els = getTokenType >>= \case
+  Nothing -> builderError msg
+  Just el -> if el `elem` els then advanceLexer else builderError msg
+  where
+  msg = "Expected one of " <> (fold $ intersperse ", " $ map toStringJava els)
 
 expectAdvance :: Psi s Bool -> JString -> Psi s ()
 expectAdvance p msg = do
@@ -88,6 +89,22 @@ expectAdvance p msg = do
   when (not x) $ builderError msg
   advanceLexer
   return ()
+
+maybeTokenAdvance :: IElementType -> Psi s Bool
+maybeTokenAdvance el = getTokenType >>= \case
+  Just t -> if t == el then advanceLexer >> return True else return False
+  Nothing -> return False
+
+maybeTokenOneOfAdvance :: [IElementType] -> Psi s Bool
+maybeTokenOneOfAdvance els = getTokenType >>= \case
+  Just t -> if t `elem` els then advanceLexer >> return True else return False
+  Nothing -> return False
+
+maybeAdvance :: Psi s Bool -> Psi s Bool
+maybeAdvance p = do
+  r <- p
+  when r advanceLexer
+  return r
 
 advanceWhile :: Psi s Bool -> Psi s () -> Psi s ()
 advanceWhile p b = whileM_ matched $ b >> advanceLexer
@@ -98,9 +115,7 @@ advanceWhile p b = whileM_ matched $ b >> advanceLexer
     return $ not eof && x
 
 whenTokenIs :: (IElementType -> Bool) -> Psi s () -> Psi s ()
-whenTokenIs p b = do
-  el <- getTokenType
-  when (p el) b
+whenTokenIs p b = withTokenType $ \el -> when (p el) b
 
 builderError :: JString -> Psi s ()
 builderError msg = calling $ psiBuilderError msg
