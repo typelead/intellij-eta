@@ -12,6 +12,7 @@ import qualified FFI.Com.IntelliJ.Psi.TokenType as TokenType
 import qualified FFI.Com.IntelliJ.Psi.Tree.TokenSet as TokenSet
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.EtaLanguage
 import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Psi.EtaFile
+import FFI.Com.TypeLead.IntelliJ.Plugin.Eta.Lang.Psi.EtaTokenTypes
 
 import IntelliJ.Plugin.Eta.Lang.Lexer.EtaParsingLexer (newEtaParsingLexer)
 import IntelliJ.Plugin.Eta.Lang.Parser.EtaPsiParser
@@ -45,9 +46,13 @@ foreign export java "getWhitespaceTokens" getWhitespaceTokens
   :: Java EtaParserDefinition TokenSet
 getWhitespaceTokens = return whiteSpaces
 
+{-# NOINLINE comments #-}
+comments :: TokenSet
+comments = TokenSet.create [jITlineComment, jITblockComment]
+
 foreign export java "getCommentTokens" getCommentTokens
   :: Java EtaParserDefinition TokenSet
-getCommentTokens = return TokenSet.empty
+getCommentTokens = return comments
 
 foreign export java "getStringLiteralElements" getStringLiteralElements
   :: Java EtaParserDefinition TokenSet

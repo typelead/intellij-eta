@@ -15,15 +15,38 @@ createEtaElement node = do
     Nothing -> error $ "Unexpected IElementType: " <> show el
     Just w -> superCastJ $ mkElement (getEtaNodeType w) node
   where
-  mkElement :: EtaNodeType -> ASTNode -> Java a EtaCompositeElement
+  mkElement :: EtaNodeType -> ASTNode -> Java a EtaPsiCompositeElement
   mkElement nodeType = case nodeType of
-    -- Later we'll need to specialize these, leaving here for now.
-    _  -> newEtaCompositeElement
+    EtaModule -> etaPsiModule
+    EtaModuleName -> etaPsiModuleName
+    EtaImports -> etaPsiImports
+    EtaImport -> etaPsiImport
+    EtaImportModule -> etaPsiImportModule
+    EtaImportAlias -> etaPsiImportAlias
+    EtaImportExplicits -> etaPsiImportExplicits
+    EtaImportExplicit -> etaPsiImportExplicit
+    EtaImportHiddens -> etaPsiImportHiddens
+    EtaImportHidden -> etaPsiImportHidden
+    EtaUnknown -> etaPsiUnknown
 
-data EtaCompositeElement = EtaCompositeElement
-  @com.typelead.intellij.plugin.eta.lang.psi.EtaCompositeElement
+---------
+-- FFI --
+---------
+
+data EtaPsiCompositeElement = EtaPsiCompositeElement
+  @com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement
   deriving Class
 
-type instance Inherits EtaCompositeElement = '[ASTWrapperPsiElement]
+type instance Inherits EtaPsiCompositeElement = '[ASTWrapperPsiElement]
 
-foreign import java unsafe "@new" newEtaCompositeElement :: ASTNode -> Java a EtaCompositeElement
+foreign import java unsafe "@static com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement.etaPsiModule" etaPsiModule :: ASTNode -> Java a EtaPsiCompositeElement
+foreign import java unsafe "@static com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement.etaPsiModuleName" etaPsiModuleName :: ASTNode -> Java a EtaPsiCompositeElement
+foreign import java unsafe "@static com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement.etaPsiImports" etaPsiImports :: ASTNode -> Java a EtaPsiCompositeElement
+foreign import java unsafe "@static com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement.etaPsiImport" etaPsiImport :: ASTNode -> Java a EtaPsiCompositeElement
+foreign import java unsafe "@static com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement.etaPsiImportModule" etaPsiImportModule :: ASTNode -> Java a EtaPsiCompositeElement
+foreign import java unsafe "@static com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement.etaPsiImportAlias" etaPsiImportAlias :: ASTNode -> Java a EtaPsiCompositeElement
+foreign import java unsafe "@static com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement.etaPsiImportExplicits" etaPsiImportExplicits :: ASTNode -> Java a EtaPsiCompositeElement
+foreign import java unsafe "@static com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement.etaPsiImportExplicit" etaPsiImportExplicit :: ASTNode -> Java a EtaPsiCompositeElement
+foreign import java unsafe "@static com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement.etaPsiImportHiddens" etaPsiImportHiddens :: ASTNode -> Java a EtaPsiCompositeElement
+foreign import java unsafe "@static com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement.etaPsiImportHidden" etaPsiImportHidden :: ASTNode -> Java a EtaPsiCompositeElement
+foreign import java unsafe "@static com.typelead.intellij.plugin.eta.lang.psi.EtaPsiCompositeElement.etaPsiUnknown" etaPsiUnknown :: ASTNode -> Java a EtaPsiCompositeElement

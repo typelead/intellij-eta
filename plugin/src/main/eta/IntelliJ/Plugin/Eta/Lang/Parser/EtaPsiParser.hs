@@ -94,8 +94,13 @@ parseImportModule = markStart $ do
 
 parseImportNames :: EtaNodeTypeWrapper -> Psi s ()
 parseImportNames wnode = do
-  parseImportName wnode
-  loop
+  mt <- getTokenType
+  if jITcparen `elem` mt then do
+    advanceLexer
+    return ()
+  else do
+    parseImportName wnode
+    loop
   where
   loop = do
     mt <- getTokenType

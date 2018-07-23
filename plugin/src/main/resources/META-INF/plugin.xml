@@ -27,6 +27,11 @@
       implementationClass="com.typelead.intellij.plugin.eta.lang.parser.EtaParserDefinition"
     />
 
+    <completion.contributor
+      language="Eta"
+      implementationClass="com.typelead.intellij.plugin.eta.codeInsight.completion.EtaCompletionContributor"
+    />
+
     <!--Disabling this until we finish the Etlas project wizard.-->
     <!--<projectTemplatesFactory-->
       <!--implementation="com.typelead.intellij.plugin.eta.project.template.EtaProjectTemplatesFactory"-->

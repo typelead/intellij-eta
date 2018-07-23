@@ -1,6 +1,7 @@
 package com.typelead.intellij.utils;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -49,6 +50,8 @@ public abstract class Either<L, R> {
 
   abstract public <X> Either<L, X> flatMap(Function<R, Either<L, X>> f);
 
+  abstract public void forEach(Consumer<R> f);
+
   abstract public <X> Either<L, X> then(Supplier<Either<L, X>> f);
 
   abstract public <X> Either<L, X> as(Supplier<X> f);
@@ -89,6 +92,9 @@ public abstract class Either<L, R> {
     public <X> Either<L, X> flatMap(Function<Object, Either<L, X>> f) {
       return castR();
     }
+
+    @Override
+    public void forEach(Consumer<Object> f) {}
 
     @Override
     public <X> Either<L, X> then(Supplier<Either<L, X>> f) {
@@ -152,6 +158,11 @@ public abstract class Either<L, R> {
     @Override
     public <X> Either<Object, X> flatMap(Function<R, Either<Object, X>> f) {
       return f.apply(value);
+    }
+
+    @Override
+    public void forEach(Consumer<R> f) {
+      f.accept(value);
     }
 
     @Override
