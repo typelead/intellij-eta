@@ -64,8 +64,13 @@ advanceLexer = calling psiBuilderAdvanceLexer
 remapAdvance :: IElementType -> Psi s ()
 remapAdvance el = calling (psiBuilderRemapCurrentToken el) >> advanceLexer
 
+getTokenTypeMaybe :: Psi s (Maybe IElementType)
+getTokenTypeMaybe = calling psiBuilderGetTokenType
+
 getTokenType :: Psi s IElementType
-getTokenType = calling psiBuilderGetTokenType
+getTokenType = getTokenTypeMaybe >>= \case
+  Just e -> pure e
+  Nothing -> error "getTokenType returned null"
 
 expectTokenAdvance :: IElementType -> Psi s ()
 expectTokenAdvance el =
@@ -126,7 +131,7 @@ instance GetProject PsiBuilder where
 
 foreign import java unsafe "@interface advanceLexer" psiBuilderAdvanceLexer :: Java PsiBuilder ()
 
-foreign import java unsafe "@interface getTokenType" psiBuilderGetTokenType :: Java PsiBuilder IElementType
+foreign import java unsafe "@interface getTokenType" psiBuilderGetTokenType :: Java PsiBuilder (Maybe IElementType)
 
 foreign import java unsafe "@interface lookAhead" psiBuilderLookAhead :: Int -> Java PsiBuilder IElementType
 

@@ -29,6 +29,15 @@ top :: Psi s ()
 top = do
   parseModule
   parseImports
+  parseUnknown
+
+-- Catchall for code we weren't able to parse.
+parseUnknown :: Psi s ()
+parseUnknown = do
+  eof <- isEOF
+  when (not eof) $ markStart $ do
+    consumeUntilEOF
+    markDone wEtaUnknown
 
 parseModule :: Psi s ()
 parseModule = whenTokenIs (== jITmodule) $ markStart $ do
@@ -48,14 +57,34 @@ parseModuleName = markStart $ do
     markError $ "Missing module name"
 
 parseImports :: Psi s ()
-parseImports = whenTokenIs (== jITimport) $ do
-  parseImport
-  parseImports
+parseImports = whenTokenIs (== jITimport) $ markStart $ do
+  loop
+  markDone wEtaImports
+  where
+  loop = do
+    parseImport
+    whenTokenIs (== jITsemi) advanceLexer
+    whenTokenIs (== jITimport) loop
 
 parseImport :: Psi s ()
 parseImport = markStart $ do
   advanceLexer
+  whenTokenIs (== jITqualified) advanceLexer
   parseImportModule
+  whenTokenIs (== jITas) $ do
+    advanceLexer
+    markStart $ do
+      expectTokenAdvance jITconid
+      markDone wEtaImportAlias
+  whenTokenIs (== jIToparen) $ do
+    advanceLexer
+    -- Also handles the jITcparen
+    parseImportNames wEtaImportExplicit
+  whenTokenIs (== jIThiding) $ do
+    advanceLexer
+    expectTokenAdvance jIToparen
+    -- Also handles the jITcparen
+    parseImportNames wEtaImportHidden
   markDone wEtaImport
 
 parseImportModule :: Psi s ()
@@ -67,10 +96,9 @@ parseImportModule = markStart $ do
   else
     markError $ "Missing import module"
 
-parseImportExplicits :: Psi s ()
-parseImportExplicits = whenTokenIs (== jIToparen) $ do
-  advanceLexer
-  parseImportExplicit
+parseImportNames :: EtaNodeTypeWrapper -> Psi s ()
+parseImportNames wnode = do
+  parseImportName wnode
   loop
   where
   loop = do
@@ -80,19 +108,35 @@ parseImportExplicits = whenTokenIs (== jIToparen) $ do
       return ()
     else if t == jITcomma then do
       advanceLexer
-      parseImportExplicit
+      parseImportName wnode
       loop
     else
       builderError "Expected close paren or comma in explicit name import"
 
-parseImportExplicit :: Psi s ()
-parseImportExplicit = do
+parseImportName :: EtaNodeTypeWrapper -> Psi s ()
+parseImportName wnode = do
   hasParen <- (jIToparen ==) <$> getTokenType
   when hasParen advanceLexer
   t <- getTokenType
-  if t `elem` [jITconid, jITvarid, jITconsym, jITvarsym] then markStart $ do
-    advanceLexer
-    markDone wEtaImportExplicit
+  if t `elem` [jITconid, jITvarid, jITconsym, jITvarsym] then do
+    markStart $ advanceLexer >> markDone wnode
+    parseImportConstructorsOrMethods wnode
   else
     builderError "Invalid explicit import; expected id, constructor, or symbol"
   when hasParen $ expectTokenAdvance jITcparen
+
+parseImportConstructorsOrMethods :: EtaNodeTypeWrapper -> Psi s ()
+parseImportConstructorsOrMethods wnode = whenTokenIs (== jIToparen) $ do
+  advanceLexer
+  t <- getTokenType
+  if t == jITdotdot then
+    markStart $ advanceLexer >> markDone wnode
+  else
+    loop
+  expectTokenAdvance jITcparen
+  where
+  loop = do
+    parseImportName wnode
+    whenTokenIs (== jITcomma) $ do
+      advanceLexer
+      loop
