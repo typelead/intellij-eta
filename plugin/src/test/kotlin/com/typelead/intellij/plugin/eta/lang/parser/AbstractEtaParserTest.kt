@@ -12,10 +12,13 @@ abstract class AbstractEtaParserTest : ParsingTestCase(
 
   override fun skipSpaces() = true
 
+  override fun loadFile(name: String): String =
+    loadFileDefault("$FIXTURE_PATH/$DATA_PATH", name)
+
   override fun checkResult(targetDataName: String, file: PsiFile) =
     doCheckResult(
-      myFullDataPath, file, checkAllPsiRoots(),
-      "$EXPECT_PATH/$targetDataName", skipSpaces(), includeRanges()
+      "$FIXTURE_PATH/$EXPECT_PATH", file, checkAllPsiRoots(),
+      targetDataName, skipSpaces(), includeRanges()
     )
 
   override fun getTestDataPath(): String = FIXTURE_PATH
