@@ -1,20 +1,24 @@
 package com.typelead.intellij.plugin.eta.codeInsight.completion
 
-import com.intellij.codeInsight.completion.CompletionParameters
-import com.intellij.codeInsight.completion.CompletionProvider
-import com.intellij.codeInsight.completion.CompletionResultSet
+import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
 import com.typelead.intellij.plugin.eta.ide.BrowseItem
 import com.typelead.intellij.plugin.eta.ide.EtaIdeExecutor
 import com.typelead.intellij.plugin.eta.ide.EtaIdeSettings
+import com.typelead.intellij.plugin.eta.lang.EtaLanguage
 import com.typelead.intellij.plugin.eta.lang.psi.*
 import com.typelead.intellij.plugin.eta.resources.EtaIcons
 
-class EtaCompletionContributor : AbstractEtaCompletionContributor() {
+class EtaCompletionContributor : CompletionContributor() {
   init {
-    addProvider(EtaCompletionProvider())
+    extend(
+      CompletionType.BASIC,
+      PlatformPatterns.psiElement().withLanguage(EtaLanguage.INSTANCE),
+      EtaCompletionProvider()
+    )
   }
 }
 
@@ -29,6 +33,7 @@ class EtaCompletionProvider : CompletionProvider<CompletionParameters>() {
     result: CompletionResultSet
   ) = EtaCompleter(etaIde, browseItemCache, parameters, context, result).complete()
 }
+
 class EtaCompleter(
   val etaIde: EtaIdeExecutor,
   val browseItemCache: HashMap<String, List<BrowseItem>>,
@@ -76,7 +81,7 @@ class EtaCompleter(
     items.forEach { item ->
       if (!alreadyImported.contains(item.name)) {
         val name = if (item.isOp) "(${item.name})" else item.name
-        add(name, item.type)
+        add(name, item.type ?: "")
       }
     }
     return true

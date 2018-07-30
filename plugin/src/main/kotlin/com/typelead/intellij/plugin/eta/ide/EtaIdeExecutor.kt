@@ -142,7 +142,7 @@ data class IdeError(
 data class BrowseItem(
   val name: String,
   val isOp: Boolean,
-  val type: String
+  val type: String?
 ) {
   companion object {
     val fromJson = gson.fromJson(BrowseItem::class.java)
