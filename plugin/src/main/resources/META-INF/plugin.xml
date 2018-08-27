@@ -40,6 +40,8 @@
       language="Haskell"
       implementationClass="com.typelead.intellij.plugin.eta.lang.psi.EtaLanguageSubstitutor"
     />
+
+    <runConfigurationProducer implementation="com.typelead.intellij.plugin.eta.run.EtaMainGradleRunConfigProducer"/>
   </extensions>
 
   <actions>

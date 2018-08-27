@@ -17,7 +17,13 @@ import org.jetbrains.plugins.gradle.frameworkSupport.GradleFrameworkSupportProvi
 import java.io.File;
 import java.util.Arrays;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class GradleEtaFrameworkSupportProvider extends GradleFrameworkSupportProvider {
+
+  private static String GRADLE_ETA_VERSION = "0.7.9";
+  private static String ETA_VERSION = "0.8.0b2";
+  private static String ETLAS_VERSION = "1.4.0.0";
+  private static String ETA_BASE_LIB_VERSION = "4.8.2.0";
 
   @NotNull
   @Override
@@ -30,16 +36,16 @@ public class GradleEtaFrameworkSupportProvider extends GradleFrameworkSupportPro
     EtaFacetType.addToModule(module);
     tryCreateEtaSrcDir(rootModel);
     buildScriptData
-      .addPluginDefinitionInPluginsGroup("id 'com.typelead.eta' version '0.7.3'")
+      .addPluginDefinitionInPluginsGroup("id 'com.typelead.eta' version '" + GRADLE_ETA_VERSION + "'")
       .addPropertyDefinition(
         unlines(
           "eta {",
-          "  version = '0.8.0b2'",
-          "  etlasVersion = '1.4.0.0'",
+          "  version = '" + ETA_VERSION + "'",
+          "  etlasVersion = '" + ETLAS_VERSION + "'",
           "}"
         )
       )
-      .addDependencyNotation("compile eta('base:4.8.2.0')");
+      .addDependencyNotation("compile eta('base:" + ETA_BASE_LIB_VERSION + "')");
   }
 
   private String unlines(String... lines) {
