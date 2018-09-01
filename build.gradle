@@ -41,6 +41,7 @@ subprojects {
     // If we want to set this to true, we should find a way to cross build
     // against multiple intellij versions.
     updateSinceUntilBuild = false
-    plugins = ['gradle']
+    // 'properties' and 'Groovy' are needed due to the 'gradle' dependency
+    plugins = ['properties', 'Groovy', 'gradle']
   }
 }
