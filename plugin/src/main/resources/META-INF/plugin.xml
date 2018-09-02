@@ -6,6 +6,9 @@
   <description>Eta language support for IntelliJ IDEA.</description>
 
   <depends>com.intellij.modules.lang</depends>
+  <!-- properties and groovy are needed due to the gradle dependency -->
+  <depends>com.intellij.properties</depends>
+  <depends>org.intellij.groovy</depends>
   <depends>org.jetbrains.plugins.gradle</depends>
 
   <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
